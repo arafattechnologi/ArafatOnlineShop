@@ -1,4 +1,5 @@
-const CACHE_NAME = 'arafat-shop-v1';
+const CACHE_NAME = 'Arafat Online Shop</title>
+<style';
 const assets = [
   '/',
   '/index.html',
