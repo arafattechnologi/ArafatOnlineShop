@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arafat Technology</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  .container { max-width: 450px; width: 100%; background: white; padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin-bottom: 20px; }
+  h2, h3 { text-align: center; color: #2c3e50; margin-top: 0; }
+
+  /* 🔐 Admin Access Styles */
+  #inventorySection { display: none; } /* Marka hore waa qarsoon tahay */
+  .admin-login-btn { background: none; border: none; color: #bdc3c7; font-size: 10px; cursor: pointer; float: right; }
+
+  /* Admin Section */
+  .admin-panel { background: #f0f7ff; border: 2px solid #3498db; border-radius: 20px; padding: 15px; margin-bottom: 10px; }
+  .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .input-row input { padding: 10px; border-radius: 10px; border: 1px solid #ccc; flex: 1; }
+
+  /* Shop Section */
+  .item { border: 1px solid #eee; padding: 15px; margin-top: 10px; border-radius: 15px; background: #fcfcfc; }
+  .row { display: flex; gap: 10px; align-items: center; }
+  select { flex: 2; padding: 12px; border-radius: 10px; border: 1px solid #ddd; }
+  .qty { width: 60px; padding: 12px; border-radius: 10px; border: 1px solid #ddd; text-align: center; }
+
+  button { cursor: pointer; font-weight: bold; border-radius: 12px; border: none; transition: 0.3s; padding: 12px; }
+  .btn-blue { background: #3498db; color: white; width: 100%; }
+  .btn-purple { background: #9b59b6; color: white; width: 100%; margin-top: 10px; }
+  .btn-green { background: #27ae60; color: white; width: 100%; margin-top: 15px; font-size: 18px; }
+  .btn-remove { background: #ff7675; color: white; padding: 5px 12px; font-size: 11px; margin-top: 8px; width: auto; }
+
+  .total-box { background: #2c3e50; color: white; text-align: center; padding: 20px; margin-top: 20px; border-radius: 18px; }
+  .total-box span { font-size: 26px; color: #2ecc71; }
+
+  /* Modal Styles */
+  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+  .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 380px; }
+  .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="container" id="inventorySection">
+  <button class="btn-remove" onclick="logoutAdmin()" style="float:right">Xir 🚪</button>
+  <h3>📦 Inventory Management</h3>
+  <div class="admin-panel">
+    <div class="input-row">
+      <input type="text" id="invName" placeholder="Magaca Buugga">
+      <input type="number" id="invPrice" placeholder="Qiimaha $">
+    </div>
+    <button class="btn-blue" onclick="addToStore()">➕ Ku dar Kaydka</button>
+  </div>
+</div>
+
+<div class="container">
+  <button class="admin-login-btn" onclick="loginAdmin()">Admin Login 🔐</button>
+  <h2>📚 Arafat Online Shop</h2>
+  
+  <div id="shopList">
+    <div class="item">
+      <div class="row">
+        <select class="book-dropdown" onchange="calcTotal()">
+          <option value="0">Dooro Buug...</option>
+        </select>
+        <input type="number" class="qty" value="1" min="1" oninput="calcTotal()">
+      </div>
+      <button class="btn-remove" onclick="removeRow(this)">Ka saar 🗑️</button>
+    </div>
+  </div>
+
+  <button class="btn-purple" onclick="addNewRow()">➕ Ku dar Buug kale</button>
+
+  <div class="total-box">Wartarka Guud: <b>$<span id="grandTotal">0.00</span></b></div>
+
+  <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+    <label style="display:block; margin-bottom:8px; font-weight:bold; color:#2c3e50;">Fadlan geli nambarkaaga:</label>
+    <input type="tel" id="custPhone" placeholder="61XXXXXXX" style="width:94%; padding:12px; border-radius:10px; border:1px solid #ddd; text-align:center; font-size:18px;">
+    <button class="btn-green" onclick="initiateOrder()">🛒 Dalbo Hadda</button>
+  </div>
+</div>
+
+<div id="payModal" class="modal">
+  <div class="modal-content">
+    <div id="confirmState">
+      <h3>Ma hubtaa?</h3>
+      <p>Ma hubtaa inaad <b>$<span id="confirmAmt"></span></b> kaga iibsanayso <b>Arafat Technology</b>?</p>
+      <button class="btn-green" onclick="processPayment()">Haa, hubaa</button>
+      <button class="btn-remove" onclick="closeModal()" style="width:100%; margin-top:10px; font-size:14px;">Maya, iska jooji</button>
+    </div>
+
+    <div id="loadingState" style="display:none;">
+      <h3>Xaqiijin...</h3>
+      <div class="loader"></div>
+      <p>Fadlan mobile-kaaga geli <b>PIN-ka</b> si aad u bixiso $<span id="modalAmount">0</span></p>
+      <p style="font-size:12px; color:gray;">Account: 666517</p>
+    </div>
+
+    <div id="successState" style="display:none;">
+      <div style="font-size:50px;">✅</div>
+      <h3 style="color:#27ae60;">Waa lagu guulaystay!</h3>
+      <p>Lacagta waa la helay, dalabkaaga waa la xareeyay.</p>
+      <button class="btn-blue" onclick="location.reload()">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Kaydka buugaagta (Inventory)
+  let storeBooks = JSON.parse(localStorage.getItem('inventory')) || [
+    { name: "English Book", price: 5 },
+    { name: "Computer Book", price: 8 }
+  ];
+
+  // 🔐 Shaqada Login-ka
+  function loginAdmin() {
+    let password = prompt("Geli Password-ka Maamulka:");
+    if (password === "1234") {
+      document.getElementById("inventorySection").style.display = "block";
+      window.scrollTo(0, 0); // Kor u qaad si loo arko admin-ka
+    } else {
+      alert("Password-ka waa khalad!");
+    }
+  }
+
+  function logoutAdmin() {
+    document.getElementById("inventorySection").style.display = "none";
+  }
+
+  function addToStore() {
+    let name = document.getElementById("invName").value;
+    let price = document.getElementById("invPrice").value;
+    if (!name || !price) return alert("Fadlan buuxi magaca iyo qiimaha!");
+    
+    storeBooks.push({ name: name, price: parseFloat(price) });
+    localStorage.setItem('inventory', JSON.stringify(storeBooks)); // Kaydi buugaagta
+    refreshDropdowns();
+    
+    document.getElementById("invName").value = "";
+    document.getElementById("invPrice").value = "";
+    alert("Buugga waa lagu daray kaydka!");
+  }
+
+  function refreshDropdowns() {
+    document.querySelectorAll(".book-dropdown").forEach(select => {
+      let current = select.value;
+      select.innerHTML = '<option value="0">Dooro Buug...</option>';
+      storeBooks.forEach(b => {
+        let op = document.createElement("option");
+        op.value = b.price;
+        op.text = `${b.name} ($${b.price})`;
+        select.add(op);
+      });
+      select.value = current;
+    });
+  }
+
+  function calcTotal() {
+    let total = 0;
+    document.querySelectorAll(".item").forEach(itm => {
+      total += (parseFloat(itm.querySelector(".book-dropdown").value) || 0) * (parseInt(itm.querySelector(".qty").value) || 1);
+    });
+    document.getElementById("grandTotal").innerText = total.toFixed(2);
+  }
+
+  function addNewRow() {
+    let shopList = document.getElementById("shopList");
+    let firstItem = document.querySelector(".item");
+    let newItem = firstItem.cloneNode(true);
+    
+    newItem.querySelector(".book-dropdown").value = "0";
+    newItem.querySelector(".qty").value = "1";
+    shopList.appendChild(newItem);
+    refreshDropdowns();
+  }
+
+  function removeRow(btn) {
+    if(document.querySelectorAll(".item").length > 1) { 
+      btn.parentElement.remove(); 
+      calcTotal(); 
+    }
+  }
+
+  function initiateOrder() {
+    let total = document.getElementById("grandTotal").innerText;
+    let phone = document.getElementById("custPhone").value;
+    if (parseFloat(total) <= 0) return alert("Fadlan dooro buug!");
+    if (phone.length < 9) return alert("Fadlan geli nambar sax ah!");
+    document.getElementById("confirmAmt").innerText = total;
+    document.getElementById("payModal").style.display = "flex";
+  }
+
+  function processPayment() {
+    let total = document.getElementById("grandTotal").innerText;
+    document.getElementById("confirmState").style.display = "none";
+    document.getElementById("loadingState").style.display = "block";
+    document.getElementById("modalAmount").innerText = total;
+    setTimeout(() => {
+      document.getElementById("loadingState").style.display = "none";
+      document.getElementById("successState").style.display = "block";
+      let ussd = `*789*666517*${Math.round(total)}#`;
+      window.location.href = "tel:" + ussd;
+    }, 3000);
+  }
+
+  function closeModal() { document.getElementById("payModal").style.display = "none"; }
+
+  window.onload = refreshDropdowns;
+</script>
+
+</body>
+
+</html>
