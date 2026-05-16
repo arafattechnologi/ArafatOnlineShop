@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Arafat Online Shop</title>
+<style>
+  :root {
+    --primary: #2c3e50;
+    --accent: #3498db;
+    --success: #27ae60;
+    --danger: #ff7675;
+    --bg: #f5f7fb;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body { 
+    font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+    background: var(--bg); 
+    padding: 12px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    margin: 0; 
+  }
+
+  .container { 
+    max-width: 420px; 
+    width: 100%; 
+    background: white; 
+    padding: 16px; 
+    border-radius: 20px; 
+    box-shadow: 0 8px 24px rgba(0,0,0,0.05); 
+    margin-bottom: 15px; 
+  }
+
+  h2 { font-size: 22px; text-align: center; color: var(--primary); margin: 10px 0 20px 0; }
+  h3 { font-size: 18px; text-align: center; color: var(--primary); margin-top: 0; }
+
+  /* 🔐 Admin Area */
+  #inventorySection { 
+    display: none; 
+    background: #f0f7ff; 
+    border: 2px solid var(--accent); 
+    border-radius: 20px; 
+    padding: 16px; 
+  } 
+  
+  .admin-login-btn { 
+    background: none; 
+    border: none; 
+    color: #bdc3c7; 
+    font-size: 11px; 
+    cursor: pointer; 
+    float: right; 
+    padding: 5px; 
+    font-weight: bold; 
+  }
+
+  .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; margin-top: 10px; }
+  .input-group input, .input-group select { padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; outline: none; width: 100%; }
+
+  /* 🔍 Filter */
+  .filter-section { margin-bottom: 15px; width: 100%; }
+  .filter-select { padding: 12px; border-radius: 12px; border: 2px solid var(--accent); width: 100%; font-weight: bold; color: var(--primary); cursor: pointer; outline: none; font-size: 14px; }
+
+  /* 📚 Shop Items */
+  .item { 
+    border: 1px solid #eef2f5; 
+    padding: 14px; 
+    margin-top: 12px; 
+    border-radius: 16px; 
+    background: #fbfcfd; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 12px; 
+    width: 100%; 
+  }
+  
+  .book-preview { 
+    width: 100px; 
+    height: 135px; 
+    border-radius: 10px; 
+    object-fit: cover; 
+    background: #eee; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+  }
+  
+  .row { display: flex; gap: 8px; align-items: center; width: 100%; }
+  .book-dropdown { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; background: white; cursor: pointer; outline: none; max-width: 75%; }
+  .qty { width: 60px; padding: 12px; border-radius: 10px; border: 1px solid #ddd; text-align: center; font-weight: bold; outline: none; font-size: 14px; }
+  .price-tag { color: var(--success); font-weight: bold; font-size: 15px; width: 100%; text-align: left; padding-left: 2px; }
+
+  /* Buttons */
+  button, .wa-link { cursor: pointer; font-weight: bold; border-radius: 12px; border: none; transition: 0.2s; padding: 14px; font-size: 14px; text-decoration: none; display: block; text-align: center; }
+  button:active, .wa-link:active { transform: scale(0.98); }
+  .btn-blue { background: var(--accent); color: white; width: 100%; }
+  .btn-purple { background: #9b59b6; color: white; width: 100%; margin-top: 8px; }
+  .btn-green, .wa-link-green { background: var(--success); color: white; width: 100%; margin-top: 12px; font-size: 16px; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2); }
+  .btn-remove { background: var(--danger); color: white; padding: 8px 12px; font-size: 12px; border-radius: 8px; width: 100%; }
+  .btn-copy { background: #e67e22; color: white; font-size: 13px; padding: 10px; border-radius: 8px; display: inline-block; margin-top: 5px; width: 100%; }
+
+  /* Admin Table */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+  th { background: #f8f9fa; padding: 8px; border-bottom: 2px solid #eee; text-align: left; }
+  td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
+
+  /* 💳 Total & USSD Box */
+  .total-section { background: var(--primary); color: white; text-align: center; padding: 16px; margin-top: 20px; border-radius: 14px; width: 100%; font-size: 18px; }
+  .total-section span { font-size: 24px; color: #2ecc71; font-weight: bold; }
+  
+  .payment-box { margin-top: 15px; padding: 16px; border: 2px dashed var(--accent); border-radius: 16px; background: #f0faff; width: 100%; }
+  .ussd-code { background: #fff; padding: 12px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 18px; color: #d35400; border: 1px solid #bee3f8; margin: 10px 0; font-weight: bold; }
+
+  /* Popups */
+  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+  .modal-content { background: white; padding: 20px; border-radius: 20px; text-align: center; width: 100%; max-width: 340px; }
+</style>
+</head>
+<body>
+
+<div class="container" id="inventorySection">
+  <button style="background:var(--danger); color:white; padding:6px 12px; font-size:11px; float:right; border-radius:6px;" onclick="logoutAdmin()">Xir 🚪</button>
+  <h3>📦 Kaydka Maamulka</h3>
+  
+  <div class="admin-panel">
+    <div class="input-group">
+      <input type="text" id="invName" placeholder="Magaca Buugga">
+      <input type="number" id="invPrice" placeholder="Qiimaha $">
+      <select id="invCat">
+          <option value="School">🏫 School</option>
+          <option value="Diini">🕌 Diini</option>
+          <option value="Aqoon">💡 Aqoon Guud</option>
+      </select>
+    </div>
+    <button class="btn-blue" onclick="addToStore()">➕ Ku dar Kaydka</button>
+  </div>
+
+  <div style="max-height: 160px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: white; margin-top: 10px;">
+    <table>
+      <thead>
+        <tr>
+          <th>Magac</th>
+          <th>Qiimo</th>
+          <th>Tirtir</th>
+        </tr>
+      </thead>
+      <tbody id="manageBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <button class="admin-login-btn" onclick="loginAdmin()">Admin 🔐</button>
+  <h2 id="shopTitle">📚 Arafat Online Shop</h2>
+  
+  <div class="filter-section">
+    <select class="filter-select" id="mainFilter" onchange="applyFilter()">
+      <option value="All">Dhammaan Buugaagta ✨</option>
+      <option value="School">🏫 Buugaagta School-ka</option>
+      <option value="Diini">🕌 Kutubta Diiniga</option>
+      <option value="Aqoon">💡 Aqoon Guud</option>
+    </select>
+  </div>
+
+  <div id="shopList"></div>
+
+  <button class="btn-purple" onclick="addNewRow()">➕ Ku dar Buug kale</button>
+
+  <div class="total-section">
+    Wartarka Guud: <b>$<span id="total">0.00</span></b>
+  </div>
+
+  <div class="payment-box">
+    <h3 style="text-align:center; color:#2980b9; margin-top:0; font-size: 16px;">💳 Lacag Bixinta</h3>
+    <p style="text-align:center; font-size:12px; margin-bottom:5px; color: #555;">Nuqul ka samey (Copy) koodhka hoose si aad u bixiso:</p>
+    
+    <div class="ussd-code" id="ussdDisplay">*789*666517*0#</div>
+    <button class="btn-copy" onclick="copyUssdCode()">Nuqul koodhka (Copy) 📋</button>
+
+    <input type="tel" id="custPhone" placeholder="Nambarkaaga EVC (61XXXXXXX)" style="width:100%; padding:14px; border-radius:10px; border:1px solid #ddd; text-align:center; font-size:16px; margin-top:12px; margin-bottom:8px; outline: none;">
+    <button class="btn-green" style="width:100%; margin-top:5px;" onclick="initiateOrder()">🛒 Dalbo Hadda</button>
+  </div>
+</div>
+
+<div id="payModal" class="modal">
+  <div class="modal-content">
+    <h3>Xaqiiji Dalabka</h3>
+    <p>Lacagta lagaa jarayo: <b>$<span id="confirmAmt"></span></b></p>
+    
+    <a href="#" id="whatsappDirectLink" target="_blank" class="wa-link wa-link-green" onclick="closeModal()">Haa, u gudub WhatsApp 💬</a>
+    
+    <button style="background:var(--danger); color:white; width:100%; margin-top:10px; padding:12px; border-radius:12px;" onclick="closeModal()">Iska jooji</button>
+  </div>
+</div>
+
+<script>
+  let defaultImg = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=200";
+  
+  let defaultBooks = [
+    { id: 1, name: "English Book", price: 5, category: "School", img: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=200" },
+    { id: 2, name: "Carabi", price: 10, category: "School", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=200" },
+    { id: 3, name: "Ajruumi", price: 4, category: "Diini", img: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=200" }
+  ];
+
+  let storeBooks = JSON.parse(localStorage.getItem('inventory')) || [];
+  if (storeBooks.length === 0) {
+    storeBooks = defaultBooks;
+    localStorage.setItem('inventory', JSON.stringify(storeBooks));
+  }
+
+  function setupDomainName() {
+    let siteName = "Arafat Online Shop";
+    document.getElementById("shopTitle").innerText = "📚 " + siteName;
+    document.title = siteName;
+  }
+
+  function loginAdmin() {
+    let password = prompt("Password-ka Maamulka:");
+    if (password === (localStorage.getItem('adminPass') || "1234")) {
+      document.getElementById("inventorySection").style.display = "block";
+      renderManageTable();
+      window.scrollTo(0, 0);
+    } else {
+      alert("Password-ka waa khaldan yahay!");
+    }
+  }
+
+  function logoutAdmin() { document.getElementById("inventorySection").style.display = "none"; }
+
+  function addToStore() {
+    let name = document.getElementById("invName").value;
+    let price = document.getElementById("invPrice").value;
+    let cat = document.getElementById("invCat").value;
+    
+    if (!name || !price) return alert("Fadlan buuxi magaca iyo qiimaha!");
+    
+    storeBooks.push({ id: Date.now(), name: name, price: parseFloat(price), img: defaultImg, category: cat });
+    localStorage.setItem('inventory', JSON.stringify(storeBooks));
+    
+    document.getElementById("invName").value = "";
+    document.getElementById("invPrice").value = "";
+    renderManageTable();
+    alert("Buugga si guul leh ayaa loogu daray dukaanka!");
+    applyFilter();
+  }
+
+  function renderManageTable() {
+    let tbody = document.getElementById("manageBody");
+    tbody.innerHTML = "";
+    storeBooks.forEach((book, index) => {
+      tbody.innerHTML += `<tr>
+        <td><b>${book.name}</b> (${book.category})</td>
+        <td>$${book.price}</td>
+        <td>
+            <button onclick="deleteBook(${index})" style="background:red;color:white;border:none;padding:5px 10px;border-radius:6px;font-size:12px;">X</button>
+        </td>
+      </tr>`;
+    });
+  }
+
+  function deleteBook(index) {
+    if(confirm("Ma hubtaa inaad tirtirto buuggan?")) {
+        storeBooks.splice(index, 1);
+        localStorage.setItem('inventory', JSON.stringify(storeBooks));
+        renderManageTable();
+        applyFilter();
+    }
+  }
+
+  function applyFilter() {
+    document.getElementById("shopList").innerHTML = ""; 
+    addNewRow(); 
+  }
+
+  function addNewRow() {
+    if(storeBooks.length === 0) return;
+    
+    let filterValue = document.getElementById("mainFilter").value;
+    let shopList = document.getElementById("shopList");
+    
+    let filteredBooks = storeBooks;
+    if (filterValue !== "All") {
+        filteredBooks = storeBooks.filter(b => b.category === filterValue);
+    }
+
+    let itemDiv = document.createElement("div");
+    itemDiv.className = "item";
+    
+    let optionsHtml = `<option value="" data-price="0" selected disabled>📖 Dooro Buug...</option>`;
+    filteredBooks.forEach(b => {
+        optionsHtml += `<option value="${b.id}" data-price="${b.price}">${b.name} ($${b.price})</option>`;
+    });
+
+    itemDiv.innerHTML = `
+      <img src="${defaultImg}" class="book-preview">
+      <div class="row">
+        <select class="book-dropdown" onchange="updateRow(this)">
+          ${optionsHtml}
+        </select>
+        <input type="number" class="qty" value="1" min="1" oninput="calcTotal()">
+      </div>
+      <div class="price-tag">Subtotal: $<span class="lineTotal">0.00</span></div>
+      <button class="btn-remove" onclick="removeItem(this)">Ka saar 🗑️</button>
+    `;
+    shopList.appendChild(itemDiv);
+    calcTotal();
+  }
+
+  function updateRow(select) {
+    let itemDiv = select.parentElement.parentElement;
+    let imgTag = itemDiv.querySelector(".book-preview");
+    let selectedId = select.value;
+    let selectedBook = storeBooks.find(b => b.id == selectedId);
+    
+    if(selectedBook) {
+      imgTag.src = selectedBook.img;
+    } else {
+      imgTag.src = defaultImg;
+    }
+    calcTotal(); 
+  }
+
+  function removeItem(btn) {
+    let items = document.querySelectorAll(".item");
+    if(items.length > 1) {
+      btn.parentElement.remove();
+      calcTotal();
+    } else {
+      alert("Waa in ugu yaraan hal buug ku jiro dalabkaaga!");
+    }
+  }
+
+  function calcTotal() {
+    let total = 0;
+    let items = document.querySelectorAll(".item");
+    
+    items.forEach(itm => {
+        let selectElement = itm.querySelector(".book-dropdown");
+        let qtyInput = itm.querySelector(".qty");
+        let lineTotalSpan = itm.querySelector(".lineTotal");
+        
+        let selectedOption = selectElement.options[selectElement.selectedIndex];
+        let price = parseFloat(selectedOption.getAttribute("data-price")) || 0;
+        let qty = parseInt(qtyInput.value) || 1;
+        
+        let lineTotal = price * qty;
+        lineTotalSpan.innerText = lineTotal.toFixed(2);
+        total += lineTotal;
+    });
+    
+    document.getElementById("total").innerText = total.toFixed(2);
+    document.getElementById("ussdDisplay").innerText = `*789*666517*${Math.round(total)}#`;
+  }
+
+  function copyUssdCode() {
+    let codeText = document.getElementById("ussdDisplay").innerText;
+    navigator.clipboard.writeText(codeText).then(() => {
+        alert("Koodhka waa la koobiyey! Hadda tag nidaamkaaga EVC si aad u bixiso.");
+    });
+  }
+
+  function initiateOrder() {
+    let total = parseFloat(document.getElementById("total").innerText);
+    let phone = document.getElementById("custPhone").value;
+    
+    let items = document.querySelectorAll(".item");
+    let hasValidBook = false;
+    
+    items.forEach(itm => {
+        let sel = itm.querySelector(".book-dropdown");
+        if(sel.value !== "") {
+            hasValidBook = true;
+        }
+    });
+
+    if (!hasValidBook || total <= 0) return alert("Fadlan dooqdo buug sax ah ka hor intaanad dalban!");
+    if (phone.trim() === "") return alert("Fadlan geli nambarkaaga EVC-ga!");
+    
+    document.getElementById("confirmAmt").innerText = total.toFixed(2);
+    
+    let roundTotal = Math.round(total);
+    let shopName = document.title;
+    
+    let message = `*--- DALAB CUSUB (${shopName.toUpperCase()}) ---*\n\n`;
+    message += `👤 *Nambarka Macamiilka:* ${phone}\n`;
+    message += `------------------------------------\n`;
+    
+    let bookCount = 1;
+    items.forEach((itm) => {
+        let selectElement = itm.querySelector(".book-dropdown");
+        if(selectElement.value !== "") {
+            let selectedOption = selectElement.options[selectElement.selectedIndex];
+            let bookName = selectedOption.text;
+            let qty = itm.querySelector(".qty").value;
+            
+            message += `📚 *Buugga ${bookCount}:* ${bookName}\n`;
+            message += `🔢 *Tirada:* ${qty}\n\n`;
+            bookCount++;
+        }
+    });
+    
+    message += `------------------------------------\n`;
+    message += `💰 *Wadar Guud:* $${total.toFixed(2)}\n`;
+    message += `📱 *EVC Account Code:* *789*666517*${roundTotal}#\n`;
+    
+    let whatsappUrl = `https://wa.me/252610666653?text=${encodeURIComponent(message)}`;
+    document.getElementById("whatsappDirectLink").href = whatsappUrl;
+
+    document.getElementById("payModal").style.display = "flex";
+  }
+
+  function closeModal() { document.getElementById("payModal").style.display = "none"; }
+
+  window.onload = () => { 
+    setupDomainName();
+    applyFilter(); 
+  };
+</script>
+</body>
+</html>
