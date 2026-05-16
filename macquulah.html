@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arafat Online Shop - Admin & Storefront</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans relative">
+
+    <nav class="bg-emerald-600 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-wide flex items-center gap-2">
+                <i class="fas fa-book-open"></i> Arafat Online Shop
+            </h1>
+            <div class="flex gap-4">
+                <button onclick="switchTab('store')" class="px-4 py-2 rounded hover:bg-emerald-700 transition font-medium cursor-pointer">Storefront</button>
+                <button onclick="checkAdminLogin()" class="px-4 py-2 bg-emerald-800 rounded hover:bg-emerald-900 transition font-medium cursor-pointer">Admin Dashboard</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4 md:p-6">
+        
+        <section id="store-section" class="tab-content">
+            <div class="flex flex-wrap gap-2 mb-6 justify-center">
+                <button onclick="filterCategory('All')" class="filter-btn bg-emerald-600 text-white px-4 py-2 rounded-full shadow">All Books</button>
+                <button onclick="filterCategory('School')" class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full shadow hover:bg-gray-100">School</button>
+                <button onclick="filterCategory('Religious')" class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full shadow hover:bg-gray-100">Religious</button>
+                <button onclick="filterCategory('General')" class="filter-btn bg-white text-gray-700 px-4 py-2 rounded-full shadow hover:bg-gray-100">General Knowledge</button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div id="products-grid" class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md h-fit border border-gray-100">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2 border-b pb-2">
+                        <i class="fas fa-shopping-cart text-emerald-600"></i> Your Order Summary
+                    </h2>
+                    
+                    <div id="cart-items" class="space-y-3 mb-4 max-h-60 overflow-y-auto">
+                        <p class="text-gray-500 text-center py-4">Your cart is empty.</p>
+                    </div>
+                    
+                    <div class="border-t pt-4 space-y-2">
+                        <div class="flex justify-between font-semibold text-lg border-b pb-2">
+                            <span>Total Price:</span>
+                            <span id="cart-total" class="text-emerald-600 font-bold">$0.00</span>
+                        </div>
+                    </div>
+
+                    <form id="checkout-form" onsubmit="triggerConfirmation(event)" class="mt-6 space-y-4">
+                        <h3 class="font-bold text-gray-700 flex items-center gap-2 text-sm uppercase tracking-wider pt-2">
+                            <i class="fas fa-user-edit text-emerald-600"></i> Delivery & Customer Info
+                        </h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Nambarkaaga Telefoonka</label>
+                            <input type="tel" id="customer-phone" placeholder="e.g., 61xxxxxxx" required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Address-kaaga (Goobta la keenayo)</label>
+                            <input type="text" id="customer-address" placeholder="Magaalada, Degmada, Jidka..." required class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 text-sm">
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg shadow-md hover:bg-emerald-700 transition flex items-center justify-center gap-2 cursor-pointer">
+                            <i class="fas fa-check-circle"></i> Dalbo Adeeggan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <div id="confirmation-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-gray-100 text-center animate-in fade-in zoom-in-95 duration-200">
+                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl mb-4">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Ma hubtaa inaa dalbato adeegaan?</h3>
+                <p class="text-xs text-gray-500 mb-6">Markaad gujiso Haa, waxaa toos kuu furmi doona nidaamka lacag bixinta ee Merchant-ka.</p>
+                
+                <div class="flex gap-3">
+                    <button onclick="closeConfirmation()" class="flex-1 bg-gray-100 text-gray-700 font-semibold py-3 rounded-xl hover:bg-gray-200 transition cursor-pointer">Maya</button>
+                    <button onclick="executePaymentAndWhatsApp()" class="flex-1 bg-emerald-600 text-white font-semibold py-3 rounded-xl hover:bg-emerald-700 transition shadow-md cursor-pointer">Haa</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="login-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+            <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-gray-100 text-center animate-in fade-in zoom-in-95 duration-200">
+                <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl mb-3">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">Admin Verification</h3>
+                <p class="text-xs text-gray-500 mb-4">Fadlan geli password-ka si aad u gasho maamulka.</p>
+                
+                <div class="space-y-3 text-left">
+                    <input type="password" id="admin-pass-input" placeholder="Geli Password-ka" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 text-sm">
+                    <p id="login-error" class="text-xs text-red-500 hidden font-medium"><i class="fas fa-exclamation-triangle"></i> Password-ku waa khalad!</p>
+                </div>
+                
+                <div class="flex gap-3 mt-5">
+                    <button onclick="closeLoginModal()" class="flex-1 bg-gray-100 text-gray-700 font-semibold py-2 rounded-lg hover:bg-gray-200 transition cursor-pointer text-sm">Ka Noqo</button>
+                    <button onclick="verifyAdminPassword()" class="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded-lg hover:bg-emerald-700 transition shadow-md cursor-pointer text-sm">Gasho</button>
+                </div>
+            </div>
+        </div>
+
+        <section id="admin-section" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                        <h2 id="form-title" class="text-xl font-bold mb-4 text-gray-700 border-b pb-2">Add New Book</h2>
+                        <form id="product-form" onsubmit="saveProduct(event)" class="space-y-4">
+                            <input type="hidden" id="edit-id">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600">Book Title</label>
+                                <input type="text" id="prod-title" required class="w-full mt-1 p-2 border rounded outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Price ($)</label>
+                                    <input type="number" step="0.01" id="prod-price" required class="w-full mt-1 p-2 border rounded outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Stock Qty</label>
+                                    <input type="number" id="prod-stock" required class="w-full mt-1 p-2 border rounded outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600">Category</label>
+                                <select id="prod-category" class="w-full mt-1 p-2 border rounded bg-white outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="School">School</option>
+                                    <option value="Religious">Religious</option>
+                                    <option value="General">General Knowledge</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-600">Cover Image URL</label>
+                                <input type="url" id="prod-image" placeholder="https://images.unsplash.com/..." class="w-full mt-1 p-2 border rounded outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit" class="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded shadow hover:bg-emerald-700 transition cursor-pointer">Save Product</button>
+                                <button type="button" onclick="resetForm()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition cursor-pointer">Clear</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg shadow-md border border-gray-100 bg-linear-to-b from-white to-gray-50">
+                        <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-1.5 uppercase tracking-wider border-b pb-2">
+                            <i class="fas fa-key text-amber-500"></i> Change Admin Password
+                        </h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Password-ka Cusub</label>
+                                <input type="password" id="new-admin-password" placeholder="Geli password cusub" class="w-full p-2 border rounded text-sm outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                            </div>
+                            <button onclick="changeAdminPassword()" class="w-full bg-amber-500 text-white font-bold py-2 rounded text-xs hover:bg-amber-600 transition shadow-xs cursor-pointer">
+                                Update Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md border border-gray-100 overflow-x-auto">
+                    <h2 class="text-xl font-bold mb-4 text-gray-700 border-b pb-2">Live Inventory Management</h2>
+                    <table class="w-full text-left border-collapse min-w-[500px]">
+                        <thead>
+                            <tr class="bg-gray-100 border-b border-gray-200 text-gray-600 text-sm font-semibold">
+                                <th class="p-3">Book Cover & Details</th>
+                                <th class="p-3">Category</th>
+                                <th class="p-3">Price</th>
+                                <th class="p-3">Stock</th>
+                                <th class="p-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-inventory-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const WHATSAPP_NUMBER = "252610666653"; // Nambarka WhatsApp-ka ee dukaanka
+        const MERCHANT_ID = "666517"; // Merchant ID-ga rasmiga ah ee Arafat Technology
+
+        // Password-ka dukaanka (Default waa admin123 haddaan la beddelin)
+        if (!localStorage.getItem('arafat_admin_pass')) {
+            localStorage.setItem('arafat_admin_pass', 'admin123');
+        }
+
+        let inventory = JSON.parse(localStorage.getItem('arafat_inventory')) || [
+            { id: 1, title: "Standard Mathematics Grade 8", price: 12.50, stock: 45, category: "School", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60" },
+            { id: 2, title: "Islamic History & Culture", price: 15.00, stock: 20, category: "Religious", image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=60" },
+            { id: 3, title: "The Encyclopedia of General Knowledge", price: 24.99, stock: 12, category: "General", image: "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=500&auto=format&fit=crop&q=60" }
+        ];
+
+        let cart = [];
+        let currentFilter = "All";
+        let globalTotal = 0;
+        let isAdminAuthenticated = false; // Xaaladda haddii admin-ku soo galay iyo in kale
+
+        function updateStorage() {
+            localStorage.setItem('arafat_inventory', JSON.stringify(inventory));
+            renderStore();
+            renderAdminTable();
+        }
+
+        function switchTab(tabName) {
+            if (tabName === 'store') {
+                isAdminAuthenticated = false; // Markuu dukaanka ku laabto ha ka baxo admin-ka
+            }
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`${tabName}-section`).classList.remove('hidden');
+        }
+
+        // ================= HABKA LOGIN-KA ADMIN-KA =================
+        function checkAdminLogin() {
+            if (isAdminAuthenticated) {
+                switchTab('admin');
+            } else {
+                document.getElementById('admin-pass-input').value = '';
+                document.getElementById('login-error').classList.add('hidden');
+                document.getElementById('login-modal').classList.remove('hidden');
+            }
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPassword() {
+            const enteredPass = document.getElementById('admin-pass-input').value;
+            const savedPass = localStorage.getItem('arafat_admin_pass');
+
+            if (enteredPass === savedPass) {
+                isAdminAuthenticated = true;
+                closeLoginModal();
+                switchTab('admin');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        // ================= HABKA BEDDELISTA PASSWORD-KA =================
+        function changeAdminPassword() {
+            const newPass = document.getElementById('new-admin-password').value.trim();
+            if (newPass.length < 4) {
+                alert("Password-ka cusub waa inuu ka koobnaadaa ugu yaraan 4 xaraf ama nambar!");
+                return;
+            }
+            localStorage.setItem('arafat_admin_pass', newPass);
+            alert("Password-kii dukaanka waa la beddelay si guul leh!");
+            document.getElementById('new-admin-password').value = '';
+        }
+
+        function filterCategory(category) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = "filter-btn bg-white text-gray-700 px-4 py-2 rounded-full shadow hover:bg-gray-100";
+            });
+            event.target.className = "filter-btn bg-emerald-600 text-white px-4 py-2 rounded-full shadow";
+            renderStore();
+        }
+
+        function renderStore() {
+            const grid = document.getElementById('products-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const filtered = inventory.filter(item => currentFilter === "All" || item.category === currentFilter);
+            filtered.forEach(item => {
+                grid.innerHTML += `
+                    <div class="bg-white p-4 rounded-lg shadow border border-gray-100 flex flex-col justify-between">
+                        <div>
+                            <img src="${item.image}" class="w-full h-48 object-cover rounded-md mb-3">
+                            <span class="text-xs font-semibold px-2 py-1 bg-emerald-50 text-emerald-600 rounded-full">${item.category}</span>
+                            <h3 class="font-bold text-lg mt-1 text-gray-800 line-clamp-2">${item.title}</h3>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xl font-extrabold text-emerald-600">$${item.price.toFixed(2)}</span>
+                                <span class="text-xs ${item.stock > 0 ? 'text-green-600' : 'text-red-500'} font-medium">${item.stock > 0 ? `In Stock (${item.stock})` : 'Out of Stock'}</span>
+                            </div>
+                            <button onclick="addToCart(${item.id})" class="w-full py-2 px-4 rounded font-semibold transition bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer">Add to Cart</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function addToCart(id) {
+            const product = inventory.find(item => item.id === id);
+            const cartItem = cart.find(item => item.id === id);
+            if (cartItem) { cartItem.qty++; } else { cart.push({ ...product, qty: 1 }); }
+            renderCart();
+        }
+
+        function changeCartQty(id, delta) {
+            const cartItem = cart.find(item => item.id === id);
+            if (!cartItem) return;
+            cartItem.qty += delta;
+            if (cartItem.qty <= 0) cart = cart.filter(item => item.id !== id);
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center py-4">Your cart is empty.</p>`;
+                document.getElementById('cart-total').innerText = "$0.00";
+                globalTotal = 0;
+                return;
+            }
+            container.innerHTML = '';
+            let total = 0;
+            cart.forEach(item => {
+                total += item.price * item.qty;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between gap-2 border-b border-gray-50 pb-2">
+                        <div class="flex-1">
+                            <h4 class="font-medium text-sm text-gray-800 line-clamp-1">${item.title}</h4>
+                            <span class="text-xs text-emerald-600 font-semibold">$${item.price.toFixed(2)} x ${item.qty}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="changeCartQty(${item.id}, -1)" class="w-6 h-6 bg-gray-100 rounded font-bold text-sm">-</button>
+                            <span class="w-6 text-center text-sm">${item.qty}</span>
+                            <button onclick="changeCartQty(${item.id}, 1)" class="w-6 h-6 bg-gray-100 rounded font-bold text-sm">+</button>
+                        </div>
+                    </div>`;
+            });
+            globalTotal = total;
+            document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
+        }
+
+        function triggerConfirmation(event) {
+            event.preventDefault();
+            if(cart.length === 0) {
+                alert("Fadlan marka hore buug ku dar gaadhiga!");
+                return;
+            }
+            document.getElementById('confirmation-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmation() {
+            document.getElementById('confirmation-modal').classList.add('hidden');
+        }
+
+        function executePaymentAndWhatsApp() {
+            const phone = document.getElementById('customer-phone').value;
+            const address = document.getElementById('customer-address').value;
+            const formattedPrice = globalTotal.toFixed(2);
+
+            const ussdCode = `*789*${MERCHANT_ID}*${formattedPrice}%23`;
+            window.location.href = `tel:${ussdCode}`;
+
+            let textMessage = `📚 *NEW ORDER - ARAFAT ONLINE SHOP*\n\n`;
+            textMessage += `👤 *Customer Info*:\n- Phone: ${phone}\n- Address: ${address}\n\n`;
+            textMessage += `🛒 *Ordered Items*:\n`;
+            
+            cart.forEach(item => {
+                const subtotal = item.price * item.qty;
+                textMessage += `- ${item.title} (x${item.qty}) - $${subtotal.toFixed(2)}\n`;
+            });
+
+            textMessage += `\n💰 *Total Price*: $${globalTotal.toFixed(2)}\n`;
+            textMessage += `📌 *Payment*: EVC Plus Merchant Service (*789*)\n`;
+            textMessage += `-------------------------------------------\n`;
+            textMessage += `✅ *Xaaladda Lacagta*:\n`;
+            textMessage += `Waan dalbaday adeeggan, koodhka rasmiga ah ee merchant-ka waa uu i furmay si aan lacagta ugu shubo *Arafat Technology*. Fadlan halkan ka eeg fariinta xaqiijinta!`;
+
+            cart = [];
+            renderCart();
+            updateStorage();
+            closeConfirmation();
+
+            setTimeout(() => {
+                const encodedText = encodeURIComponent(textMessage);
+                window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodedText}`, '_blank');
+            }, 1000);
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-inventory-table');
+            if (!tbody) return; tbody.innerHTML = '';
+            inventory.forEach(item => {
+                tbody.innerHTML += `
+                    <tr class="border-b text-sm">
+                        <td class="p-3 flex items-center gap-3"><img src="${item.image}" class="w-10 h-10 object-cover rounded shadow-sm"><span>${item.title}</span></td>
+                        <td class="p-3">${item.category}</td>
+                        <td class="p-3 font-bold">$${item.price.toFixed(2)}</td>
+                        <td class="p-3">${item.stock} units</td>
+                        <td class="p-3 text-center">
+                            <button onclick="editProduct(${item.id})" class="text-emerald-600 p-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteProduct(${item.id})" class="text-red-500 p-1"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        function saveProduct(event) {
+            event.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const title = document.getElementById('prod-title').value;
+            const price = parseFloat(document.getElementById('prod-price').value);
+            const stock = parseInt(document.getElementById('prod-stock').value);
+            const category = document.getElementById('prod-category').value;
+            const image = document.getElementById('prod-image').value || "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
+
+            if (id) {
+                const index = inventory.findIndex(item => item.id == id);
+                if (index !== -1) inventory[index] = { id: parseInt(id), title, price, stock, category, image };
+            } else {
+                const newId = inventory.length ? Math.max(...inventory.map(i => i.id)) + 1 : 1;
+                inventory.push({ id: newId, title, price, stock, category, image });
+            }
+            resetForm(); updateStorage();
+        }
+
+        function editProduct(id) {
+            const item = inventory.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('edit-id').value = item.id;
+            document.getElementById('prod-title').value = item.title;
+            document.getElementById('prod-price').value = item.price;
+            document.getElementById('prod-stock').value = item.stock;
+            document.getElementById('prod-category').value = item.category;
+            document.getElementById('prod-image').value = item.image;
+            document.getElementById('form-title').innerText = "Modify Product Entry";
+        }
+
+        function deleteProduct(id) {
+            if (confirm("Ma hubtaa inaad tirtirto buuggan?")) { inventory = inventory.filter(i => i.id !== id); updateStorage(); }
+        }
+
+        function resetForm() { document.getElementById('product-form').reset(); document.getElementById('edit-id').value = ''; document.getElementById('form-title').innerText = "Add New Book"; }
+
+        renderStore();
+        renderAdminTable();
+    </script>
+</body>
+</html>
+    
