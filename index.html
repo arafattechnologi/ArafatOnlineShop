@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arafat Shop & Data</title>
+    <link class="rounded-sm" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-animate { animation: slideUp 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans relative">
+
+    <div id="toast-container" class="fixed bottom-5 right-5 left-5 md:left-auto md:w-80 z-50 space-y-2 pointer-events-none"></div>
+
+    <nav class="bg-emerald-600 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+            <h1 class="text-xl font-bold tracking-wide flex items-center gap-2">
+                <i class="fas fa-layer-group"></i> Arafat Shop
+            </h1>
+            <div class="flex gap-2 w-full sm:w-auto justify-center">
+                <button onclick="switchMainTab('books')" id="main-btn-books" class="flex-1 sm:flex-initial px-4 py-2 rounded-lg bg-emerald-700 font-bold text-xs cursor-pointer shadow">
+                    <i class="fas fa-book"></i> Books
+                </button>
+                <button onclick="switchMainTab('data')" id="main-btn-data" class="flex-1 sm:flex-initial px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 font-bold text-xs cursor-pointer">
+                    <i class="fas fa-bolt"></i> Data Service
+                </button>
+                <button onclick="checkAdminLogin()" id="main-btn-admin" class="flex-1 sm:flex-initial px-4 py-2 bg-emerald-800 rounded-lg hover:bg-emerald-900 font-bold text-xs cursor-pointer flex items-center justify-center gap-1">
+                    <i class="fas fa-lock"></i> Maamulka
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4 md:p-6">
+        
+        <section id="store-section" class="tab-content active">
+            
+            <div id="sub-categories-books" class="flex flex-wrap gap-2 mb-6 justify-center">
+                <button onclick="filterCategory('All-Books', event)" class="sub-btn bg-emerald-600 text-white px-5 py-2 rounded-full shadow font-medium text-sm">Dhamaan Buugta</button>
+                <button onclick="filterCategory('School', event)" class="sub-btn bg-white text-gray-700 px-5 py-2 rounded-full shadow hover:bg-gray-100 font-medium text-sm">School</button>
+                <button onclick="filterCategory('Diini', event)" class="sub-btn bg-white text-gray-700 px-5 py-2 rounded-full shadow hover:bg-gray-100 font-medium text-sm">Diini</button>
+            </div>
+
+            <div id="sub-categories-data" class="flex flex-wrap gap-2 mb-6 justify-center hidden">
+                <button onclick="filterCategory('All-Data', event)" class="sub-btn bg-emerald-600 text-white px-5 py-2 rounded-full shadow font-medium text-sm">Dhamaan Adeegyada</button>
+                <button onclick="filterCategory('Hormuud', event)" class="sub-btn bg-white text-gray-700 px-5 py-2 rounded-full shadow hover:bg-gray-100 font-medium text-sm">Hormuud</button>
+                <button onclick="filterCategory('Somnet', event)" class="sub-btn bg-white text-gray-700 px-5 py-2 rounded-full shadow hover:bg-gray-100 font-medium text-sm">Somnet</button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div id="products-grid" class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-md h-fit border border-gray-100">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2 border-b pb-2 text-gray-700">
+                        <i class="fas fa-shopping-basket text-emerald-600"></i> Wadar ahaan (Total)
+                    </h2>
+                    <div id="cart-items" class="space-y-3 mb-4 max-h-60 overflow-y-auto">
+                        <p class="text-gray-500 text-center py-4 text-sm">Your cart is empty.</p>
+                    </div>
+
+                    <div class="border-t pt-4 space-y-2 mb-4">
+                        <div class="flex justify-between font-bold text-base text-gray-700">
+                            <span>Wadar ahaan (Total):</span>
+                            <span id="cart-total" class="text-emerald-600 font-black text-xl">$0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-2">
+                        <h3 class="font-bold text-gray-600 flex items-center gap-2 text-xs uppercase tracking-wider">
+                            <i class="fas fa-map-marker-alt text-emerald-600"></i> GOOBTA IYO TELEFOONKA
+                        </h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Nambarkaaga Telefoonka (9 God)</label>
+                            <input type="tel" id="customer-phone" maxlength="9" placeholder="e.g., 61xxxxxxx" class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50/50 text-sm font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Address-kaaga (Halka laguugu keenayo)</label>
+                            <input type="text" id="customer-address" placeholder="Magaalada, Degmada, Jidka..." class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50/50 text-sm font-medium">
+                        </div>
+
+                        <p class="text-xs font-bold text-gray-500 uppercase tracking-wide pt-2 border-t border-gray-100">DOORO HABKA AAD U DALBANAYSO:</p>
+                        <div class="space-y-2.5">
+                            <button onclick="handleOrder('whatsapp')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md cursor-pointer text-sm">
+                                <i class="fab fa-whatsapp text-lg"></i> Ku Dalbo WhatsApp
+                            </button>
+                            <button onclick="handleOrder('merchant')" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md cursor-pointer text-sm">
+                                <i class="fas fa-phone-alt"></i> Bixi Lacagta (Merchant)
+                            </button>
+                            <button onclick="clearCartAndInputs()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer text-xs">
+                                <i class="fas fa-trash-alt"></i> Tirtir Gaadhiga & Xogta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="login-modal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4 backdrop-blur-xs">
+            <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-gray-100 text-center">
+                <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl mb-3">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">Admin Verification</h3>
+                <p class="text-xs text-gray-500 mb-4">Fadlan geli password-ka si aad u maamusho alaabta.</p>
+                <input type="password" id="admin-pass-input" placeholder="Geli Password-ka" class="w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50 text-sm">
+                <p id="login-error" class="text-xs text-red-500 hidden font-medium mt-1"><i class="fas fa-exclamation-triangle"></i> Password-ku waa khalad!</p>
+                <div class="flex gap-3 mt-5">
+                    <button type="button" onclick="closeLoginModal()" class="flex-1 bg-gray-100 text-gray-700 font-semibold py-2 rounded-lg hover:bg-gray-200 transition text-sm cursor-pointer">Ka Noqo</button>
+                    <button type="button" onclick="verifyAdminPassword()" class="flex-1 bg-emerald-600 text-white font-semibold py-2 rounded-lg hover:bg-emerald-700 transition shadow-md text-sm cursor-pointer font-bold">Gasho</button>
+                </div>
+            </div>
+        </div>
+
+        <section id="admin-section" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                        <h2 id="form-title" class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Add New Item</h2>
+                        <form id="product-form" onsubmit="saveProduct(event)" class="space-y-4">
+                            <div>
+                                <label id="label-title" class="block text-xs font-bold text-gray-600">Item Title / Package Name</label>
+                                <input type="text" id="prod-title" required placeholder="e.g., Form 4 Maths" class="w-full mt-1 p-2 border rounded text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600">Price ($)</label>
+                                <input type="number" step="0.01" id="prod-price" required class="w-full mt-1 p-2 border rounded text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600">Category</label>
+                                <select id="prod-category" class="w-full mt-1 p-2 border rounded text-sm bg-white outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600">Image URL (Optional)</label>
+                                <input type="url" id="prod-image" placeholder="https://images.unsplash.com/..." class="w-full mt-1 p-2 border rounded text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div class="flex gap-2 pt-2">
+                                <button type="submit" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded text-sm shadow hover:bg-emerald-700 transition cursor-pointer">Save Item</button>
+                                <button type="button" onclick="resetForm()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-300 transition cursor-pointer">Clear</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md border border-gray-100 overflow-x-auto">
+                    <h2 id="table-title" class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">Live Inventory Management</h2>
+                    <table class="w-full text-left border-collapse min-w-[500px]">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-gray-600 text-xs font-bold uppercase tracking-wider">
+                                <th class="p-3">Item Details</th>
+                                <th class="p-3">Category</th>
+                                <th class="p-3">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-inventory-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const WHATSAPP_NUMBER = "252610666653"; 
+        const MERCHANT_ID = "666517"; 
+
+        if (!localStorage.getItem('arafat_admin_pass')) {
+            localStorage.setItem('arafat_admin_pass', 'admin123');
+        }
+
+        let inventory = JSON.parse(localStorage.getItem('arafat_inventory')) || [
+            { id: 1, title: "Standard Mathematics Grade 8", price: 12.50, category: "School", image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60" },
+            { id: 2, title: "Islamic History & Culture", price: 15.00, category: "Diini", image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=60" },
+            { id: 3, title: "Hormuud Internet $1 (Idaacfa)", price: 1.00, category: "Hormuud", image: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23F59E0B%22/><text y=%2265%22 x=%2215%22 font-size=%2250%22 fill=%22white%22 font-weight=%22bold%22>4G</text></svg>" },
+            { id: 4, title: "Somnet Internet $1", price: 1.00, category: "Somnet", image: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%232563EB%22/><text y=%2265%22 x=%2215%22 font-size=%2250%22 fill=%22white%22 font-weight=%22bold%22>5G</text></svg>" }
+        ];
+
+        let cart = [];
+        let currentMainTab = "books"; 
+        let previousModule = "books"; // Waxay xasuusanaysaa meeshii uu joogay kahor intaan maamulka la riixin
+        let currentFilter = "All-Books";
+        let globalTotal = 0;
+        let isAdminAuthenticated = false;
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-animate p-3 rounded-xl text-white font-bold text-xs shadow-lg flex items-center gap-2 pointer-events-auto ${type === 'success' ? 'bg-emerald-600' : 'bg-red-500'}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function switchMainTab(tabName) {
+            if (tabName !== 'admin') {
+                previousModule = tabName; // Kaydi nidaamka hadda (books ama data)
+            }
+            currentMainTab = tabName;
+            
+            document.getElementById('main-btn-books').className = `flex-1 sm:flex-initial px-4 py-2 rounded-lg font-bold text-xs cursor-pointer ${tabName === 'books' ? 'bg-emerald-700 shadow' : 'bg-emerald-600 hover:bg-emerald-700'}`;
+            document.getElementById('main-btn-data').className = `flex-1 sm:flex-initial px-4 py-2 rounded-lg font-bold text-xs cursor-pointer ${tabName === 'data' ? 'bg-emerald-700 shadow' : 'bg-emerald-600 hover:bg-emerald-700'}`;
+            document.getElementById('main-btn-admin').className = `flex-1 sm:flex-initial px-4 py-2 rounded-lg font-bold text-xs cursor-pointer ${tabName === 'admin' ? 'bg-emerald-900 shadow' : 'bg-emerald-800 hover:bg-emerald-900'}`;
+
+            if (tabName === 'admin') {
+                document.getElementById('store-section').classList.remove('active');
+                document.getElementById('admin-section').classList.add('active');
+                setupAdminView(); // U kala xir qaybaha maamulka
+            } else {
+                isAdminAuthenticated = false;
+                document.getElementById('admin-section').classList.remove('active');
+                document.getElementById('store-section').classList.add('active');
+                
+                if (tabName === 'books') {
+                    document.getElementById('sub-categories-books').classList.remove('hidden');
+                    document.getElementById('sub-categories-data').classList.add('hidden');
+                    resetSubFilterButtons('books');
+                    currentFilter = "All-Books";
+                } else if (tabName === 'data') {
+                    document.getElementById('sub-categories-books').classList.add('hidden');
+                    document.getElementById('sub-categories-data').classList.remove('hidden');
+                    resetSubFilterButtons('data');
+                    currentFilter = "All-Data";
+                }
+                renderStore();
+            }
+        }
+
+        // Shaqada u kala xiraysa Form-ka iyo Table-ka hadba module-ka taagan
+        function setupAdminView() {
+            const formTitle = document.getElementById('form-title');
+            const tableTitle = document.getElementById('table-title');
+            const labelTitle = document.getElementById('label-title');
+            const selectCategory = document.getElementById('prod-category');
+            
+            selectCategory.innerHTML = ''; 
+
+            if (previousModule === 'books') {
+                formTitle.innerHTML = `<i class="fas fa-book text-emerald-600"></i> Add New Book`;
+                tableTitle.innerHTML = `Live Inventory (Books Only)`;
+                labelTitle.innerText = "Book Title";
+                selectCategory.innerHTML = `
+                    <option value="School">School</option>
+                    <option value="Diini">Diini</option>
+                `;
+            } else {
+                formTitle.innerHTML = `<i class="fas fa-bolt text-amber-500"></i> Add New Data Package`;
+                tableTitle.innerHTML = `Live Inventory (Data Service Only)`;
+                labelTitle.innerText = "Package Name";
+                selectCategory.innerHTML = `
+                    <option value="Hormuud">Hormuud</option>
+                    <option value="Somnet">Somnet</option>
+                `;
+            }
+            renderAdminTable();
+        }
+
+        function resetSubFilterButtons(type) {
+            document.querySelectorAll('.sub-btn').forEach(btn => {
+                btn.className = "sub-btn bg-white text-gray-700 px-5 py-2 rounded-full shadow hover:bg-gray-100 font-medium text-sm";
+            });
+            if(type === 'books') {
+                document.querySelector("#sub-categories-books font") || (document.getElementById('sub-categories-books').firstElementChild.className = "sub-btn bg-emerald-600 text-white px-5 py-2 rounded-full shadow font-medium text-sm");
+            } else {
+                document.getElementById('sub-categories-data').firstElementChild.className = "sub-btn bg-emerald-600 text-white px-5 py-2 rounded-full shadow font-medium text-sm";
+            }
+        }
+
+        function checkAdminLogin() {
+            if (isAdminAuthenticated) { switchMainTab('admin'); } else {
+                document.getElementById('admin-pass-input').value = '';
+                document.getElementById('login-error').classList.add('hidden');
+                document.getElementById('login-modal').classList.remove('hidden');
+            }
+        }
+
+        function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
+
+        function verifyAdminPassword() {
+            const enteredPass = document.getElementById('admin-pass-input').value;
+            const savedPass = localStorage.getItem('arafat_admin_pass');
+            if (enteredPass === savedPass) {
+                isAdminAuthenticated = true; closeLoginModal(); switchMainTab('admin');
+            } else { document.getElementById('login-error').classList.remove('hidden'); }
+        }
+
+        function filterCategory(category, event) {
+            currentFilter = category;
+            document.querySelectorAll('.sub-btn').forEach(btn => {
+                btn.className = "sub-btn bg-white text-gray-700 px-5 py-2 rounded-full shadow hover:bg-gray-100 font-medium text-sm";
+            });
+            if(event) { event.target.className = "sub-btn bg-emerald-600 text-white px-5 py-2 rounded-full shadow font-medium text-sm"; }
+            renderStore();
+        }
+
+        function renderStore() {
+            const grid = document.getElementById('products-grid');
+            if (!grid) return; grid.innerHTML = '';
+            
+            let filtered = [];
+            if (currentFilter === "All-Books") {
+                filtered = inventory.filter(item => item.category === "School" || item.category === "Diini");
+            } else if (currentFilter === "All-Data") {
+                filtered = inventory.filter(item => item.category === "Hormuud" || item.category === "Somnet");
+            } else {
+                filtered = inventory.filter(item => item.category === currentFilter);
+            }
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full bg-white p-8 text-center rounded-xl text-gray-400 font-medium text-sm">Wax alaabo ah lama helin qaybtan.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                grid.innerHTML += `
+                <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 flex flex-col justify-between">
+                    <div>
+                        <img src="${item.image}" class="w-full h-44 object-cover rounded-lg mb-3">
+                        <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full uppercase">${item.category}</span>
+                        <h3 class="font-bold text-base mt-1 text-gray-800 line-clamp-2">${item.title}</h3>
+                    </div>
+                    <div class="mt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-lg font-black text-emerald-600">$${item.price.toFixed(2)}</span>
+                        </div>
+                        <button onclick="addToCart(${item.id})" class="w-full py-2 px-4 rounded-lg font-bold transition bg-emerald-600 text-white hover:bg-emerald-700 text-xs uppercase tracking-wide cursor-pointer">
+                            Ku Dar Gaadhiga
+                        </button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function addToCart(id) {
+            const product = inventory.find(item => item.id === id);
+            const cartItem = cart.find(item => item.id === id);
+            if (cartItem) { cartItem.qty++; } else { cart.push({ ...product, qty: 1 }); }
+            renderCart();
+            showToast("Waa lagu daray gaadhiga!");
+        }
+
+        function changeCartQty(id, delta) {
+            const cartItem = cart.find(item => item.id === id);
+            if (!cartItem) return;
+            cartItem.qty += delta;
+            if (cartItem.qty <= 0) cart = cart.filter(item => item.id !== id);
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            if (container) {
+                if (cart.length === 0) {
+                    container.innerHTML = `<p class="text-gray-500 text-center py-4 text-sm">Your cart is empty.</p>`;
+                    document.getElementById('cart-total').innerText = "$0.00"; globalTotal = 0; return;
+                }
+                container.innerHTML = '';
+            }
+            let total = 0;
+            cart.forEach(item => { total += item.price * item.qty; });
+            globalTotal = total; document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
+            cart.forEach(item => {
+                if (container) {
+                    container.innerHTML += `
+                    <div class="flex items-center justify-between gap-2 border-b border-gray-100 pb-2">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-xs text-gray-800 line-clamp-1">${item.title}</h4>
+                            <span class="text-xs text-emerald-600 font-bold">$${item.price.toFixed(2)} x ${item.qty}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button onclick="changeCartQty(${item.id}, -1)" class="w-5 h-5 bg-gray-100 rounded text-xs font-black cursor-pointer">-</button>
+                            <span class="w-5 text-center text-xs font-bold">${item.qty}</span>
+                            <button onclick="changeCartQty(${item.id}, 1)" class="w-5 h-5 bg-gray-100 rounded text-xs font-black cursor-pointer">+</button>
+                        </div>
+                    </div>`;
+                }
+            });
+        }
+
+        function handleOrder(type) {
+            const phone = document.getElementById('customer-phone').value.replace(/\s+/g, '');
+            const address = document.getElementById('customer-address').value.trim();
+            
+            if(cart.length === 0) { showToast("Fadlan marka hore alaab ku dar gaadhiga!", "error"); return; }
+            if(phone.length !== 9 || isNaN(phone)) { showToast("Fadlan geli nambar sax ah oo 9 god ah!", "error"); return; }
+            if(!address) { showToast("Fadlan buuxi goobta address-kaaga!", "error"); return; }
+            
+            if (type === 'whatsapp') {
+                let textMessage = `📚 *DALAB CUSUB - ARAFAT SHOP*\n\n`;
+                textMessage += `📞 *Customer Tel*: ${phone}\n`;
+                textMessage += `📍 *Goobta*: ${address}\n\n`;
+                cart.forEach(item => { textMessage += `- ${item.title} [${item.category}] (x${item.qty})\n`; });
+                textMessage += `\n💰 *Total Price*: $${globalTotal.toFixed(2)}\n`;
+                window.open(`https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(textMessage)}`, '_blank');
+                cart = []; renderCart();
+            } else if (type === 'merchant') {
+                const rawAmount = Math.round(globalTotal * 100); 
+                const directDialCode = `*789*${MERCHANT_ID}*${rawAmount}#`;
+                window.location.href = `tel:${encodeURIComponent(directDialCode)}`;
+                showToast("Koodhkii wicitaanka waa loo diray taleefonka!");
+                cart = []; renderCart();
+                document.getElementById('customer-phone').value = '';
+                document.getElementById('customer-address').value = '';
+            }
+        }
+
+        function clearCartAndInputs() {
+            cart = []; renderCart();
+            document.getElementById('customer-phone').value = '';
+            document.getElementById('customer-address').value = '';
+            showToast("Gaadhigii waa la nadiifiyey!");
+        }
+
+        // Shaandheynta Shaxda Inventory-ga si ay u raacdo qaybta la joogo
+        function renderAdminTable() {
+            const tbody = document.getElementById('admin-inventory-table');
+            if (!tbody) return; tbody.innerHTML = '';
+            
+            let filteredAdminItems = inventory.filter(item => {
+                if (previousModule === 'books') {
+                    return item.category === "School" || item.category === "Diini";
+                } else {
+                    return item.category === "Hormuud" || item.category === "Somnet";
+                }
+            });
+
+            filteredAdminItems.forEach(item => {
+                tbody.innerHTML += `
+                <tr class="border-b text-xs text-gray-700">
+                    <td class="p-3 flex items-center gap-3 font-medium">
+                        <img src="${item.image}" class="w-9 h-9 object-cover rounded shadow-xs">
+                        <span class="line-clamp-1">${item.title}</span>
+                    </td>
+                    <td class="p-3"><span class="px-2 py-0.5 bg-gray-100 rounded text-gray-600 font-semibold text-[11px]">${item.category}</span></td>
+                    <td class="p-3 font-bold text-emerald-600">$${item.price.toFixed(2)}</td>
+                </tr>`;
+            });
+        }
+
+        function saveProduct(event) {
+            event.preventDefault();
+            const title = document.getElementById('prod-title').value;
+            const price = parseFloat(document.getElementById('prod-price').value);
+            const category = document.getElementById('prod-category').value;
+            
+            let defaultImg = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
+            if(category === 'Hormuud' || category === 'Somnet') {
+                let bgColor = category === 'Hormuud' ? '%23F59E0B' : '%232563EB';
+                let label = category === 'Hormuud' ? '4G' : '5G';
+                defaultImg = `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22${bgColor}%22/><text y=%2265%22 x=%2215%22 font-size=%2250%22 fill=%22white%22 font-weight=%22bold%22>${label}</text></svg>`;
+            }
+            const image = document.getElementById('prod-image').value || defaultImg;
+            
+            const newId = inventory.length ? Math.max(...inventory.map(i => i.id)) + 1 : 1;
+            inventory.push({ id: newId, title, price, category, image });
+            showToast("Alaab cusub ayaa la kaydiyey!");
+            resetForm(); updateStorage();
+        }
+
+        function updateStorage() {
+            localStorage.setItem('arafat_inventory', JSON.stringify(inventory));
+            renderStore(); setupAdminView();
+        }
+
+        function resetForm() { document.getElementById('product-form').reset(); }
+
+        renderStore(); renderAdminTable(); switchMainTab('books');
+    </script>
+</body>
+</html>
