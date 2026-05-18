@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arafat Online Shop</title>
+    <link class="rounded-sm" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛍️</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card-cut { clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-animate { animation: slideUp 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen pb-24">
+
+    <header id="main-header" class="bg-[#00965e] text-white pt-6 pb-5 px-4 shadow-md sticky top-0 z-40">
+        <div class="container mx-auto max-w-2xl text-center">
+            <h1 class="text-xl font-black tracking-wide flex items-center justify-center gap-2 mb-4">
+                <i class="fas fa-shopping-bag"></i> Arafat Online Shop
+            </h1>
+            
+            <div class="flex gap-2 justify-center max-w-sm mx-auto mb-3">
+                <button onclick="switchCategory('books')" id="nav-btn-books" class="flex-1 py-2.5 bg-[#007d4e] text-white rounded-lg font-black text-xs cursor-pointer shadow transition border border-white/40">
+                    <i class="fas fa-book"></i> Books Store
+                </button>
+                <button onclick="switchCategory('data')" id="nav-btn-data" class="flex-1 py-2.5 bg-[#007d4e] text-white/80 rounded-lg font-bold text-xs cursor-pointer shadow transition">
+                    <i class="fas fa-wifi"></i> Data Service
+                </button>
+            </div>
+
+            <div class="max-w-sm mx-auto">
+                <button onclick="checkAdminLogin()" class="w-full py-1.5 bg-black/20 hover:bg-black/30 text-white/90 rounded-md font-bold text-[11px] cursor-pointer transition">
+                    <i class="fas fa-lock text-[9px]"></i> Dashboard-ka Maamulka
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 max-w-2xl">
+
+        <div id="books-section" class="tab-content active">
+            <h2 class="text-xs font-black text-gray-500 uppercase tracking-wider mb-4"><i class="fas fa-bookmark text-[#00965e]"></i> Buugaagta Diyaar Kaaga Ah</h2>
+            
+            <div id="books-grid" class="grid grid-cols-1 gap-3"></div>
+        </div>
+
+
+        <div id="data-section" class="tab-content">
+            <div id="network-filters" class="flex gap-2 mb-5 justify-center">
+                <button onclick="filterNetwork('All', event)" class="net-filter-btn bg-[#00965e] text-white px-5 py-1.5 rounded-full text-xs font-bold shadow cursor-pointer">Dhamaan Adeegyada</button>
+                <button onclick="filterNetwork('Hormuud', event)" class="net-filter-btn bg-white text-gray-600 border border-gray-200 px-5 py-1.5 rounded-full text-xs font-semibold cursor-pointer">Hormuud</button>
+                <button onclick="filterNetwork('Somnet', event)" class="net-filter-btn bg-white text-gray-600 border border-gray-200 px-5 py-1.5 rounded-full text-xs font-semibold cursor-pointer">Somnet</button>
+            </div>
+
+            <div id="main-services-grid" class="grid grid-cols-2 gap-4"></div>
+
+            <div id="sub-packages-view" class="hidden space-y-4">
+                <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-200 shadow-xs mb-2">
+                    <h2 id="sub-view-title" class="text-xs font-black text-gray-800 uppercase tracking-wider">Adeegyada</h2>
+                    <button onclick="backToMainServices()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer">
+                        <i class="fas fa-arrow-left"></i> Ka Noqo
+                    </button>
+                </div>
+                <div id="sub-packages-list" class="space-y-3"></div>
+            </div>
+        </div>
+
+
+        <div id="phone-input-section" class="hidden max-w-md mx-auto bg-white min-h-[70vh] p-5 rounded-2xl border border-gray-100 relative">
+            <div class="flex items-center mb-6">
+                <button onclick="backToModalFromForm()" class="text-gray-800 text-lg p-2 hover:bg-gray-100 rounded-full cursor-pointer">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <span id="form-flow-title" class="text-xs font-black ml-2 text-gray-400 uppercase tracking-wider">Bixinta Lacagta</span>
+            </div>
+
+            <div id="dynamic-inputs-container" class="space-y-5"></div>
+
+            <div id="form-package-card-container" class="mt-6"></div>
+
+            <div class="mt-8">
+                <button onclick="submitFinalPayment()" class="w-full bg-[#e2e2e2] text-gray-500 font-bold py-3.5 rounded-full text-sm shadow-xs transition cursor-pointer hover:bg-[#00965e] hover:text-white active:scale-98 flex items-center justify-center gap-2">
+                    Bixi Lacagta
+                </button>
+            </div>
+        </div>
+
+
+        <div id="admin-section" class="tab-content">
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-xs mb-6">
+                <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-4">
+                    <h2 class="text-sm font-bold text-[#00965e] flex items-center gap-2"><i class="fas fa-plus"></i> Maamulka Alaabta</h2>
+                    <button onclick="switchCategory('books')" class="text-xs text-gray-500 hover:text-gray-800 font-bold"><i class="fas fa-times"></i> Xidh</button>
+                </div>
+                
+                <p class="text-xs text-gray-400 mb-4">Xogta hadda waxay ku kaydsantahay Browser-kaaga (LocalStorage).</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="payment-modal" class="fixed inset-0 bg-black/50 hidden flex items-end justify-center z-50 p-0 backdrop-blur-xs transition-opacity duration-300">
+        <div class="bg-white w-full max-w-md rounded-t-3xl p-5 shadow-2xl modal-animate border-t border-gray-200">
+            <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-5 cursor-pointer" onclick="closePaymentModal()"></div>
+            
+            <div id="selected-package-card-container" class="mb-5"></div>
+
+            <h3 class="text-sm font-black text-gray-800 mb-3 text-left pl-1">Dooro habka lacag bixinta</h3>
+            
+            <div class="space-y-3">
+                <button onclick="goToPhoneInputForm('EVC')" class="w-full bg-white hover:bg-gray-50 border border-gray-200 p-3.5 rounded-xl flex items-center justify-between cursor-pointer transition shadow-xs active:scale-98">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#00a2e8] text-white px-3 py-2 rounded-lg font-black text-sm tracking-tight">EVC<span class="text-emerald-300">+</span></div>
+                        <span class="text-xs font-bold text-gray-700">EVC Plus</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                </button>
+
+                <button onclick="goToPhoneInputForm('Jeeb')" class="w-full bg-white hover:bg-gray-50 border border-gray-200 p-3.5 rounded-xl flex items-center justify-between cursor-pointer transition shadow-xs active:scale-98">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#005ea6] text-white px-3 py-2 rounded-lg font-black text-sm tracking-tight flex items-center gap-1"><i class="fas fa-mobile-alt text-xs"></i>Jeeb</div>
+                        <span class="text-xs font-bold text-gray-700">Jeeb</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                </button>
+            </div>
+
+            <button onclick="closePaymentModal()" class="w-full mt-4 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl text-xs cursor-pointer transition">Ka Noqo</button>
+        </div>
+    </div>
+
+    <div id="login-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center z-50 p-4 backdrop-blur-xs">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-xl text-center">
+            <h3 class="text-sm font-bold text-gray-800 mb-3">Gasho Maamulka</h3>
+            <input type="password" id="admin-pass-input" placeholder="Geli Password-ka" class="w-full p-2 border border-gray-300 rounded-lg text-xs outline-none">
+            <p id="login-error" class="text-[10px] text-red-500 hidden mt-1">Password-ku waa khaldan yahay!</p>
+            <div class="flex gap-2 mt-4">
+                <button onclick="closeLoginModal()" class="flex-1 bg-gray-200 text-gray-600 font-bold py-1.5 rounded-lg text-xs cursor-pointer">Ka Noqo</button>
+                <button onclick="verifyAdminPassword()" class="flex-1 bg-[#00965e] text-white font-bold py-1.5 rounded-lg text-xs cursor-pointer">Gasho</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bottom-nav-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2 flex justify-around items-center z-40 text-center shadow-lg">
+        <button onclick="switchCategory('books')" class="flex flex-col items-center gap-0.5 cursor-pointer">
+            <i class="fas fa-home text-base text-red-500"></i>
+            <span class="text-[10px] text-red-500 font-bold">Bogga Hore</span>
+        </button>
+        <button onclick="switchCategory('data')" class="flex flex-col items-center gap-0.5 text-gray-400 cursor-pointer">
+            <i class="fas fa-list-ul text-base"></i>
+            <span class="text-[10px] text-gray-400 font-medium">Data Services</span>
+        </button>
+    </div>
+
+    <script>
+        const MERCHANT_ID = "666517"; 
+        let selectedProductPrice = 0;
+        let activePaymentMethod = "";
+        let currentPackageHTML = "";
+        let currentItemType = "books"; // "books" ama "data"
+
+        if (!localStorage.getItem('arafat_admin_pass')) {
+            localStorage.setItem('arafat_admin_pass', 'admin123');
+        }
+
+        // XOGTA BUUGAAGTA (BOOKS DATA)
+        const booksList = [
+            { id: 101, title: "English Grammar Rules", price: 3.50, oldPrice: 5.00, desc: "Baro naxwaha luuqada English-ka si fudud.", icon: "📚" },
+            { id: 102, title: "Spoken English Course", price: 5.00, oldPrice: 8.00, desc: "Buugga hagaajinta wada sheekaysiga.", icon: "🗣️" },
+            { id: 103, title: "Vocabulary Builder", price: 2.50, oldPrice: 4.00, desc: "Erayada ugu muhiimsan ee luuqada English-ka.", icon: "📝" }
+        ];
+
+        // XOGTA DATA-DA (DATA DATA)
+        const mainServices = [
+            { id: "kuhadal", title: "Ku Hadal", network: "Hormuud" },
+            { id: "anfac", title: "AnfacPlus GB", network: "Hormuud" },
+            { id: "adsl_plus", title: "ADSL PLUS", network: "Hormuud" },
+            { id: "unlimited", title: "Unlimited", network: "Hormuud" },
+            { id: "voice", title: "Recharge Voice", network: "Hormuud" }
+        ];
+
+        let subPackages = [
+            { id: 1, mainServiceId: "kuhadal", title: "80min", price: 0.89, oldPrice: 1.00, info: ["80 daqiiqo kuhadal", "30 maalin"], badge: "30 Maalin", network: "Hormuud" },
+            { id: 6, mainServiceId: "anfac", title: "2GB", price: 0.90, oldPrice: 1.00, info: ["80 daqiiqo kuhadal", "7 maalin"], badge: "Usbuucle", network: "Hormuud" },
+            { id: 8, mainServiceId: "adsl_plus", title: "ADSL", price: 22.50, oldPrice: 25.00, info: ["20Mbps internet", "IPTV"], badge: "30 Maalin", network: "Hormuud" },
+            { id: 16, mainServiceId: "voice", title: "5G", price: 22.50, oldPrice: 25.00, info: ["5G Internet Portable", "Xawaare sare"], badge: "30 Maalin", network: "Hormuud" }
+        ];
+
+        let currentNetworkFilter = "All";
+        let isAdminAuthenticated = false;
+
+        // KALA BEDELAADA LABADA QAYBOOD (BOOKS IYO DATA)
+        function switchCategory(cat) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('phone-input-section').classList.add('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('bottom-nav-bar').classList.remove('hidden');
+
+            document.getElementById('nav-btn-books').className = "flex-1 py-2.5 bg-[#007d4e] text-white/80 rounded-lg font-medium text-xs cursor-pointer shadow transition";
+            document.getElementById('nav-btn-data').className = "flex-1 py-2.5 bg-[#007d4e] text-white/80 rounded-lg font-medium text-xs cursor-pointer shadow transition";
+
+            if (cat === 'books') {
+                currentItemType = "books";
+                document.getElementById('books-section').classList.add('active');
+                document.getElementById('nav-btn-books').className = "flex-1 py-2.5 bg-[#007d4e] text-white rounded-lg font-black text-xs cursor-pointer shadow transition border border-white/40";
+                renderBooks();
+            } else if (cat === 'data') {
+                currentItemType = "data";
+                document.getElementById('data-section').classList.add('active');
+                document.getElementById('nav-btn-data').className = "flex-1 py-2.5 bg-[#007d4e] text-white rounded-lg font-black text-xs cursor-pointer shadow transition border border-white/40";
+                backToMainServices();
+            }
+        }
+
+        // 1. RENDER BOOKS
+        function renderBooks() {
+            const container = document.getElementById('books-grid');
+            container.innerHTML = '';
+            booksList.forEach(book => {
+                container.innerHTML += `
+                <div onclick="openBookPaymentModal('${book.title}', ${book.price}, ${book.oldPrice}, '${book.desc}', '${book.icon}')" class="bg-white rounded-xl border border-gray-200 p-4 shadow-xs flex justify-between items-center cursor-pointer hover:border-blue-500 transition active:scale-98">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl bg-gray-50 p-2 rounded-lg border border-gray-100">${book.icon}</div>
+                        <div>
+                            <h4 class="font-black text-sm text-gray-800">${book.title}</h4>
+                            <p class="text-[11px] text-gray-400 font-medium">${book.desc}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-gray-400 line-through block font-bold">$${book.oldPrice.toFixed(2)}</span>
+                        <span class="text-[#00965e] font-black text-sm">$${book.price.toFixed(2)}</span>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // OPEN MODAL FOR BOOK
+        function openBookPaymentModal(title, price, oldPrice, desc, icon) {
+            selectedProductPrice = price;
+            currentPackageHTML = `
+            <div class="bg-white rounded-2xl shadow-md flex overflow-hidden border-2 border-blue-600 relative h-24 p-0">
+                <div class="bg-blue-600 text-white w-[30%] flex flex-col justify-center items-center relative z-10">
+                    <span class="text-3xl">${icon}</span>
+                </div>
+                <div class="bg-white flex-1 flex justify-between items-center pl-5 pr-4 relative z-0">
+                    <div>
+                        <h4 class="font-black text-base text-gray-800 leading-tight">${title}</h4>
+                        <p class="text-[10px] text-gray-400 font-medium">${desc}</p>
+                    </div>
+                    <div class="text-right flex flex-col justify-center">
+                        <span class="text-[11px] text-gray-400 line-through font-bold leading-none">$${oldPrice.toFixed(2)}</span>
+                        <span class="text-gray-900 font-black text-lg leading-tight">$${price.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>`;
+            document.getElementById('selected-package-card-container').innerHTML = currentPackageHTML;
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        // 2. RENDER DATA SERVICES
+        function filterNetwork(net, event) {
+            currentNetworkFilter = net;
+            document.querySelectorAll(`.net-filter-btn`).forEach(btn => {
+                btn.className = "net-filter-btn bg-white text-gray-600 border border-gray-200 px-5 py-1.5 rounded-full text-xs font-semibold cursor-pointer";
+            });
+            if(event) { event.target.className = "net-filter-btn bg-[#00965e] text-white px-5 py-1.5 rounded-full text-xs font-bold shadow cursor-pointer"; }
+            backToMainServices();
+        }
+
+        function renderMainServices() {
+            const grid = document.getElementById('main-services-grid');
+            grid.innerHTML = '';
+            const filtered = currentNetworkFilter === 'All' ? mainServices : mainServices.filter(s => s.network === currentNetworkFilter);
+            filtered.forEach(service => {
+                grid.innerHTML += `
+                <div onclick="openSubPackages('${service.id}', '${service.title}')" class="bg-[#00965e] hover:bg-[#008252] text-white p-4 rounded-xl shadow-xs flex flex-col items-center justify-center text-center cursor-pointer transition active:scale-95 border border-[#007d4e] min-h-[100px]">
+                    <div class="w-10 h-10 rounded-full border border-white/50 flex items-center justify-center relative mb-1.5 bg-black/10">
+                        <span class="font-black text-sm tracking-tighter">H</span>
+                    </div>
+                    <h3 class="font-bold text-[11px] tracking-wide uppercase">${service.title}</h3>
+                </div>`;
+            });
+        }
+
+        function openSubPackages(serviceId, serviceTitle) {
+            document.getElementById('main-services-grid').classList.add('hidden');
+            document.getElementById('network-filters').classList.add('hidden');
+            const subView = document.getElementById('sub-packages-view');
+            subView.classList.remove('hidden');
+            document.getElementById('sub-view-title').innerText = serviceTitle;
+            
+            const listContainer = document.getElementById('sub-packages-list');
+            listContainer.innerHTML = '';
+            const filtered = subPackages.filter(p => p.mainServiceId === serviceId);
+
+            filtered.forEach(pkg => {
+                let infoHTML = '';
+                pkg.info.forEach(inf => { infoHTML += `<div class="text-gray-800 text-[11px] font-semibold"><i class="fas fa-check text-emerald-600 text-[9px]"></i> ${inf}</div>`; });
+                const escapedPkgInfo = JSON.stringify(pkg.info).replace(/"/g, '&quot;');
+
+                listContainer.innerHTML += `
+                <div onclick="openDataPaymentModal('${pkg.title}', ${pkg.price}, ${pkg.oldPrice}, '${pkg.badge}', '${escapedPkgInfo}')" class="bg-white rounded-xl shadow-xs flex overflow-hidden border border-gray-200 cursor-pointer transition active:scale-98 relative h-20">
+                    <div class="bg-[#28a745] text-white w-[35%] flex flex-col justify-center pl-3 pr-2 card-cut relative z-10">
+                        <h4 class="font-black text-base tracking-tight leading-none">${pkg.title}</h4>
+                    </div>
+                    <div class="bg-white flex-1 flex justify-between items-center pl-4 pr-3 relative z-0">
+                        <div class="space-y-0.5">${infoHTML}</div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-gray-400 line-through block font-bold">$${pkg.oldPrice.toFixed(2)}</span>
+                            <span class="text-gray-900 font-black text-base">$${pkg.price.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function openDataPaymentModal(title, price, oldPrice, badge, infoJSON) {
+            selectedProductPrice = price;
+            const infoArray = JSON.parse(infoJSON.replace(/&quot;/g, '"'));
+            let infoHTML = '';
+            infoArray.forEach(inf => { infoHTML += `<div class="text-gray-800 text-[11px] font-semibold"><i class="fas fa-check text-emerald-600 text-[9px]"></i> ${inf}</div>`; });
+
+            currentPackageHTML = `
+            <div class="bg-white rounded-2xl shadow-md flex overflow-hidden border-2 border-blue-600 relative h-24 p-0">
+                <div class="bg-[#28a745] text-white w-[35%] flex flex-col justify-center pl-4 pr-2 card-cut relative z-10">
+                    <h4 class="font-black text-lg tracking-tight leading-none">${title}</h4>
+                </div>
+                <div class="bg-white flex-1 flex justify-between items-center pl-5 pr-4 relative z-0">
+                    <div class="space-y-0.5">${infoHTML}</div>
+                    <div class="text-right">
+                        <span class="text-[11px] text-gray-400 line-through font-bold block">$${oldPrice.toFixed(2)}</span>
+                        <span class="text-gray-900 font-black text-xl">$${price.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>`;
+            document.getElementById('selected-package-card-container').innerHTML = currentPackageHTML;
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function backToMainServices() {
+            document.getElementById('sub-packages-view').classList.add('hidden');
+            document.getElementById('main-services-grid').classList.remove('hidden');
+            document.getElementById('network-filters').classList.remove('hidden');
+            renderMainServices();
+        }
+
+        function closePaymentModal() { document.getElementById('payment-modal').classList.add('hidden'); }
+
+        // 3. U GUDBIDDA PHONE INPUTS BROWSER FORM (DYNAMIC DYNAMIC)
+        function goToPhoneInputForm(method) {
+            activePaymentMethod = method;
+            closePaymentModal();
+            
+            document.getElementById('main-header').classList.add('hidden');
+            document.getElementById('books-section').classList.remove('active');
+            document.getElementById('data-section').classList.remove('active');
+            document.getElementById('bottom-nav-bar').classList.add('hidden');
+            
+            const formSection = document.getElementById('phone-input-section');
+            formSection.classList.remove('hidden');
+
+            const inputsContainer = document.getElementById('dynamic-inputs-container');
+            inputsContainer.innerHTML = '';
+
+            // DYNAMIC INPUTS SALAYNTA NOOCA ALAABTA (BOOK AMA DATA)
+            if (currentItemType === "books") {
+                document.getElementById('form-flow-title').innerText = "Bixinta Lacagta Buugga";
+                inputsContainer.innerHTML = `
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Lambarka lacagta aad ka direysid (EVC/Jeeb)</label>
+                    <div class="flex rounded-xl border border-blue-500 overflow-hidden shadow-xs">
+                        <span class="bg-gray-50 px-4 py-3 flex items-center gap-2 border-r border-gray-200 text-xs font-bold text-gray-700">252</span>
+                        <input type="number" id="sender-phone" placeholder="61xxxxxxx" class="w-full px-3 py-3 text-sm outline-none font-semibold">
+                    </div>
+                </div>`;
+            } else {
+                document.getElementById('form-flow-title').innerText = "Bixinta Lacagta Data-da";
+                inputsContainer.innerHTML = `
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Lambarka lacagta aad ka direysid</label>
+                    <div class="flex rounded-xl border border-blue-500 overflow-hidden shadow-xs">
+                        <span class="bg-gray-50 px-4 py-3 flex items-center gap-2 border-r border-gray-200 text-xs font-bold text-gray-700">252</span>
+                        <input type="number" id="sender-phone" placeholder="61xxxxxxx" class="w-full px-3 py-3 text-sm outline-none font-semibold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Lambarka Data aad u rabtid</label>
+                    <div class="flex rounded-xl border border-gray-200 overflow-hidden shadow-xs focus-within:border-blue-500">
+                        <span class="bg-gray-50 px-4 py-3 flex items-center gap-2 border-r border-gray-200 text-xs font-bold text-gray-700">252</span>
+                        <input type="number" id="receiver-phone" placeholder="61xxxxxxx" class="w-full px-3 py-3 text-sm outline-none font-semibold">
+                    </div>
+                </div>`;
+            }
+            
+            document.getElementById('form-package-card-container').innerHTML = currentPackageHTML;
+        }
+
+        function backToModalFromForm() {
+            document.getElementById('phone-input-section').classList.add('hidden');
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById(currentItemType === "books" ? 'books-section' : 'data-section').classList.add('active');
+            document.getElementById('bottom-nav-bar').classList.remove('hidden');
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        // SUBMIT PAYMENT DIALER
+        function submitFinalPayment() {
+            const sender = document.getElementById('sender-phone').value.trim();
+            const receiver = document.getElementById('receiver-phone') ? document.getElementById('receiver-phone').value.trim() : sender;
+
+            if (!sender || !receiver) {
+                alert("Fadlan buuxi meelaha banaan ka hor inta aadan bixin lacagta!");
+                return;
+            }
+
+            const rawAmount = Math.round(selectedProductPrice * 100); 
+            const directDialCode = `*789*${MERCHANT_ID}*${rawAmount}#`;
+            
+            switchCategory(currentItemType);
+            window.location.href = `tel:${encodeURIComponent(directDialCode)}`;
+        }
+
+        // ADMIN PANEL ADMIN LOGINS
+        function checkAdminLogin() {
+            if (isAdminAuthenticated) { 
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                document.getElementById('admin-section').classList.add('active');
+            } else {
+                document.getElementById('admin-pass-input').value = '';
+                document.getElementById('login-error').classList.add('hidden');
+                document.getElementById('login-modal').classList.remove('hidden');
+            }
+        }
+        function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
+        function verifyAdminPassword() {
+            if (document.getElementById('admin-pass-input').value === localStorage.getItem('arafat_admin_pass')) {
+                isAdminAuthenticated = true; closeLoginModal(); checkAdminLogin();
+            } else { document.getElementById('login-error').classList.remove('hidden'); }
+        }
+
+        // Initial Load
+        renderBooks();
+    </script>
+</body>
+</html>
