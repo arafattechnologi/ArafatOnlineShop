@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arafat Real Estate - Maamulka</title>
+    <style>
+        :root { --primary: #2c3e50; --secondary: #3498db; --success: #25D366; --admin: #e74c3c; --light: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); padding: 20px; }
+        .container { max-width: 450px; margin: auto; background: white; padding: 25px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: var(--primary); cursor: pointer; }
+        .form-group { margin: 15px 0; }
+        select, input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; margin-top: 10px; border: none; border-radius: 15px; font-weight: bold; cursor: pointer; color: white; }
+        .property-card { border: 1px solid #eee; padding: 15px; margin-top: 20px; border-radius: 20px; background: #fafafa; }
+        #adminPanel { display: none; margin-top: 30px; padding: 20px; border: 2px solid var(--admin); border-radius: 20px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 onclick="toggleAdminLogin()">🏠 Arafat Real Estate</h2>
+
+    <!-- Qaybtan ayaan u bixiyay id="mainContent" si aan u qarin karo -->
+    <div id="mainContent">
+        <div id="loginArea" style="display:none; margin-bottom: 20px;">
+            <input type="password" id="adminPass" placeholder="Geli Password-ka Admin-ka">
+            <button class="btn" style="background:var(--primary)" onclick="verifyLogin()">🔑 Login</button>
+        </div>
+
+        <div class="form-group">
+            <label>🏗️ Nooca iyo Qolalka</label>
+            <select id="features"></select>
+        </div>
+
+        <button class="btn" style="background:var(--secondary)" onclick="calculate()">🔎 Raadi & Xisaabi</button>
+        <div id="results"></div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel">
+        <h3>📋 Inventory Management</h3>
+        <div id="inventoryList" style="max-height: 300px; overflow-y: auto;"></div>
+        <hr>
+        <h4>➕ Ku dar Guri Cusub</h4>
+        <select id="newCategory">
+            <option value="Fillo">Fillo</option>
+            <option value="Dabaq">Dabaq</option>
+        </select>
+        <input type="text" id="newName" placeholder="Magaca qolalka (e.g. 4+)">
+        <input type="number" id="newPrice" placeholder="Qiimaha">
+        <button class="btn" style="background:var(--success)" onclick="addNewItem()">✅ Ku dar Guri</button>
+        <button class="btn" style="background:gray" onclick="closeAdmin()">❌ Xir Admin</button>
+    </div>
+</div>
+
+<script>
+    let inventory = JSON.parse(localStorage.getItem('inventory')) || [
+        {category: "Fillo", name: "4+", price: 400},
+        {category: "Dabaq", name: "1+1", price: 150}
+    ];
+
+    function updateFeatures() {
+        let select = document.getElementById('features');
+        select.innerHTML = "";
+        inventory.forEach((item, index) => {
+            let opt = document.createElement("option");
+            opt.value = index;
+            opt.textContent = `${item.category} ${item.name} - $${item.price}`;
+            select.appendChild(opt);
+        });
+    }
+
+    function updateAdminList() {
+        let list = document.getElementById('inventoryList');
+        list.innerHTML = "";
+        inventory.forEach((item, index) => {
+            list.innerHTML += `<div class="item-row">
+                <span>${item.category} ${item.name} ($${item.price})</span>
+                <button onclick="removeItem(${index})" style="background:red; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">X</button>
+            </div>`;
+        });
+    }
+
+    function toggleAdminLogin() { document.getElementById('loginArea').style.display = 'block'; }
+
+    function verifyLogin() {
+        if(document.getElementById('adminPass').value === "1234") {
+            // Halkan ayaan ku qariyay qaybtii kale
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            updateAdminList();
+        } else { alert("Password khalad ah!"); }
+    }
+
+    function closeAdmin() { 
+        // Halkan ayaan dib ugu soo celiyay qaybtii kale
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none'; 
+        document.getElementById('loginArea').style.display = 'none'; 
+    }
+
+    function addNewItem() {
+        let category = document.getElementById('newCategory').value;
+        let name = document.getElementById('newName').value;
+        let price = document.getElementById('newPrice').value;
+        if(name && price) {
+            inventory.push({category: category, name: name, price: parseFloat(price)});
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            updateFeatures(); updateAdminList();
+        }
+    }
+
+    function removeItem(index) {
+        inventory.splice(index, 1);
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        updateFeatures(); updateAdminList();
+    }
+
+    function calculate() {
+        let index = document.getElementById('features').value;
+        if (inventory[index]) {
+            let item = inventory[index];
+            let total = item.price * 1.20;
+            document.getElementById('results').innerHTML = `<div class="property-card"><h3>Total: $${total.toFixed(2)}</h3>
+            <button class="btn" style="background:var(--success)" onclick="window.open('https://wa.me/252610888808?text=Waxaan rabaa ${item.category} ${item.name} qiimihiisuna yahay $${total.toFixed(2)}')">
+            💬 WhatsApp Mulkiilaha</button></div>`;
+        }
+    }
+
+    updateFeatures();
+</script>
+</body>
+</html>
