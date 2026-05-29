@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arafat Multi-Store</title>
+    <link class="rounded-sm" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏪</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card-cut { clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-animate { animation: slideUp 0.3s ease-out forwards; }
+        
+        body {
+            padding-bottom: 75px; 
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 65px;
+            background-color: #131926;
+            border-top: 1px solid #202c33;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-sizing: border-box;
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #8696a0;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            flex: 1;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+
+        .nav-item.active {
+            color: #00965e;
+        }
+
+        .nav-item.call-btn {
+            color: #00965e;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 500px;
+            background-color: #131926;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 24px 20px 40px 20px;
+            box-sizing: border-box;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 24px;
+        }
+
+        .modal-options {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .option-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .option-box.whatsapp-color {
+            background-color: #25d366;
+        }
+
+        .option-box.phone-color {
+            background-color: #ff5722;
+        }
+
+        .option-box i {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-gray-200 font-sans min-h-screen">
+
+    <header id="main-header" class="bg-[#00965e] text-white pt-6 pb-6 px-4 shadow-md sticky top-0 z-40">
+        <div class="container mx-auto max-w-2xl text-center">
+            <h1 onclick="handleAdminTrigger()" class="text-2xl font-black tracking-wide flex items-center justify-center gap-2 mb-5 cursor-pointer select-none">
+                <i class="fas fa-store"></i> Arafat Multi-Store
+            </h1>
+            
+            <div class="flex gap-2.5 justify-center max-w-md mx-auto mb-1">
+                <button onclick="switchCategory('data')" id="nav-btn-data" class="flex-1 py-4 bg-[#007d4e] text-white rounded-xl font-black text-sm cursor-pointer shadow transition active:scale-95">
+                    <i class="fas fa-wifi"></i> Data
+                </button>
+                <button onclick="switchCategory('books')" id="nav-btn-books" class="flex-1 py-4 bg-[#007d4e] text-white/80 rounded-xl font-black text-sm cursor-pointer shadow transition active:scale-95">
+                    <i class="fas fa-book"></i> Buugaagta
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 max-w-2xl">
+
+        <div id="data-section" class="tab-content">
+            <div id="network-filters" class="flex gap-3 mb-6 justify-center">
+                <button onclick="filterNetwork('Hormuud', event)" class="net-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Hormuud</button>
+                <button onclick="filterNetwork('Somnet', event)" class="net-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Somnet</button>
+            </div>
+            <div id="data-services-grid" class="grid grid-cols-2 gap-4"></div>
+        </div>
+
+        <div id="books-section" class="tab-content">
+            <div id="book-filters" class="flex gap-3 mb-6 justify-center">
+                <button onclick="filterBooks('Diini', event)" class="book-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Diini</button>
+                <button onclick="filterBooks('School', event)" class="book-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Maadi</button>
+            </div>
+            <div id="books-grid" class="grid grid-cols-1 gap-3"></div>
+        </div>
+
+        <div id="sub-packages-view" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/10 shadow-sm mb-2">
+                <h2 id="sub-view-title" class="text-sm font-black text-white uppercase tracking-wider">Xirmooyinka Adeegga</h2>
+                <button onclick="backToMainServices()" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-xs font-black flex items-center gap-1 cursor-pointer transition active:scale-95">
+                    <i class="fas fa-arrow-left"></i> Ka Noqo
+                </button>
+            </div>
+            <div id="sub-packages-list" class="space-y-3"></div>
+        </div>
+
+        <div id="phone-input-section" class="hidden max-w-md mx-auto bg-[#131926] min-h-[70vh] p-5 rounded-2xl border border-white/10 relative">
+            <div class="flex items-center mb-6">
+                <button onclick="backToModalFromForm()" class="text-white text-xl p-3 hover:bg-white/10 rounded-full cursor-pointer transition active:scale-95">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <span id="form-flow-title" class="text-xs font-black ml-2 text-gray-400 uppercase tracking-wider">Xaqiijinta Lacag Bixinta</span>
+            </div>
+
+            <div id="dynamic-inputs-container" class="space-y-5"></div>
+            <div id="form-package-card-container" class="mt-6"></div>
+
+            <div class="mt-8">
+                <button onclick="submitFinalPayment()" class="w-full bg-[#00965e] text-white font-black py-4 rounded-full text-base shadow-md transition cursor-pointer active:scale-95 flex items-center justify-center gap-2">
+                    Xaqiiji oo Bixi Lacagta
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="payment-modal" class="fixed inset-0 bg-black/70 hidden flex items-end justify-center z-50 p-0 backdrop-blur-xs transition-opacity duration-300">
+        <div class="bg-[#131926] w-full max-w-md rounded-t-3xl p-6 shadow-2xl modal-animate border-t border-white/10 text-white">
+            <div class="w-16 h-2 bg-gray-600 rounded-full mx-auto mb-6 cursor-pointer" onclick="closePaymentModal()"></div>
+            
+            <div id="selected-package-card-container" class="mb-6"></div>
+
+            <h3 class="text-sm font-black text-gray-300 mb-4 text-left pl-1">Dooro habka lacag bixinta</h3>
+            
+            <div class="space-y-4">
+                <button onclick="goToPhoneInputForm('EVC')" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-xl flex items-center justify-between cursor-pointer transition shadow-sm active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#00a2e8] text-white px-4 py-2.5 rounded-lg font-black text-base tracking-tight">EVC<span class="text-emerald-300">+</span></div>
+                        <span class="text-sm font-black text-gray-200">EVC Plus</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                </button>
+
+                <button onclick="goToPhoneInputForm('Jeeb')" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-xl flex items-center justify-between cursor-pointer transition shadow-sm active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#005ea6] text-white px-4 py-2.5 rounded-lg font-black text-base tracking-tight flex items-center gap-1"><i class="fas fa-mobile-alt text-sm"></i>Jeeb</div>
+                        <span class="text-sm font-black text-gray-200">Jeeb</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                </button>
+            </div>
+
+            <button onclick="closePaymentModal()" class="w-full mt-5 bg-white/5 hover:bg-white/10 text-gray-400 font-black py-3.5 rounded-xl text-xs cursor-pointer transition border border-white/5">Ka Noqo</button>
+        </div>
+    </div>
+
+    <div id="admin-auth-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-xs">
+        <div class="bg-[#131926] w-full max-w-sm rounded-2xl p-6 border border-white/10 shadow-2xl">
+            <h3 class="text-base font-black text-white mb-2 flex items-center gap-2"><i class="fas fa-lock text-emerald-500"></i> Galitaanka Maamulka</h3>
+            <p class="text-xs text-gray-400 mb-4">Geli PIN-ka sirta ah ee maamulka.</p>
+            <input type="password" id="admin-pin-input" placeholder="Geli PIN-ka" class="w-full px-4 py-3 bg-[#182030] border border-white/10 rounded-xl text-white font-bold tracking-widest text-center outline-none focus:border-[#00965e] mb-4">
+            <div class="flex gap-2">
+                <button onclick="closeAdminAuth()" class="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-bold text-xs text-gray-400 border border-white/5 cursor-pointer">Ka Noqo</button>
+                <button onclick="verifyAdminPin()" class="flex-1 py-3 bg-[#00965e] hover:bg-[#007d4e] rounded-xl font-bold text-xs text-white cursor-pointer">Geli</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-dashboard-section" class="hidden container mx-auto p-4 max-w-2xl pb-28">
+        <div class="flex justify-between items-center bg-[#131926] p-4 rounded-xl border border-white/10 shadow-md mb-6">
+            <div>
+                <h2 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2"><i class="fas fa-chart-line text-emerald-500"></i> Control Dashboard Panel</h2>
+                <p class="text-[11px] text-gray-400">Maamul alaabta dukaanka iyo xirmooyinka data-da.</p>
+            </div>
+            <button onclick="closeAdminDashboard()" class="px-4 py-2.5 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 text-red-400 rounded-xl text-xs font-bold cursor-pointer">
+                Ka Bax
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 mb-6 text-center">
+            <div class="bg-[#131926] p-3 rounded-xl border border-white/10">
+                <span class="text-[9px] text-gray-400 font-bold uppercase block mb-1">Data Packages</span>
+                <span id="total-data-count" class="text-xl font-black text-white">0</span>
+            </div>
+            <div class="bg-[#131926] p-3 rounded-xl border border-white/10">
+                <span class="text-[9px] text-gray-400 font-bold uppercase block mb-1">Books Item</span>
+                <span id="total-books-count" class="text-xl font-black text-white">0</span>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-[#131926] p-5 rounded-2xl border border-white/10 shadow-md">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2 text-red-400"><i class="fas fa-tasks"></i> Maamul Alaabta Jirta</h3>
+                <div class="flex gap-2 mb-4">
+                    <button onclick="switchAdminManageTab('data')" id="admin-tab-data" class="flex-1 py-2.5 bg-[#00965e] text-white rounded-lg font-bold text-xs cursor-pointer text-center">Data</button>
+                    <button onclick="switchAdminManageTab('books')" id="admin-tab-books" class="flex-1 py-2.5 bg-white/5 text-gray-400 rounded-lg font-bold text-xs cursor-pointer text-center">Buugaagta</button>
+                </div>
+                <div id="admin-items-list" class="max-h-60 overflow-y-auto space-y-2 pr-1 text-xs"></div>
+            </div>
+
+            <div class="bg-[#131926] p-5 rounded-2xl border border-white/10 shadow-md">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2 text-emerald-400"><i class="fas fa-plus-circle"></i> Ku Dar Buug Cusub</h3>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Magaca Buuga</label>
+                        <input type="text" id="new-item-title" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Nooca Qaybta</label>
+                        <select id="new-item-type-select" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                            <option value="data-books:Diini">Buug - Diini</option>
+                            <option value="data-books:School">Buug - Maadi (School)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Qiimaha ($)</label>
+                        <input type="number" step="0.01" id="new-item-price" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Qiimihii Hore ($)</label>
+                        <input type="number" step="0.01" id="new-item-oldprice" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Astaanta</label>
+                        <input type="text" id="new-item-icon" value="📖" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white text-center outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-3 mb-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Faahfaahin Gaaban</label>
+                        <input type="text" id="new-item-desc" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                </div>
+                <button onclick="addGenericProductItem()" class="w-full py-3 bg-[#00965e] hover:bg-[#007d4e] text-white rounded-xl text-xs font-bold cursor-pointer transition">Xaqiiji oo Ku Dar</button>
+            </div>
+
+            <div class="bg-[#131926] p-5 rounded-2xl border border-white/10 shadow-md">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2 text-blue-400"><i class="fas fa-plus-circle"></i> Ku Dar Xirmo Data</h3>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Adeegga Wayn</label>
+                        <select id="new-pkg-service-id" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                            <option value="kuhadal">Ku Hadal (Hormuud Data)</option>
+                            <option value="anfac">AnfacPlus GB (Hormuud Data)</option>
+                            <option value="adsl_plus">ADSL PLUS (Hormuud Data)</option>
+                            <option value="unlimited">Unlimited (Hormuud Data)</option>
+                            <option value="voice">Recharge Voice (Hormuud Data)</option>
+                            <option value="kaafi_unlim">Kaafi Unlimited (Somnet Data)</option>
+                            <option value="qanciye">Qanciye Call+GB (Somnet Data)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Magaca Xirmada</label>
+                        <input type="text" id="new-pkg-title" placeholder="Tusaale: 5GB" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Qiimaha ($)</label>
+                        <input type="number" step="0.01" id="new-pkg-price" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Qiimihii Hore ($)</label>
+                        <input type="number" step="0.01" id="new-pkg-oldprice" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Sumadda</label>
+                        <input type="text" id="new-pkg-badge" placeholder="Tusaale: 1 Bil" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-3 mb-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Waxa ku jira (Ku kala saar kooma ",")</label>
+                        <input type="text" id="new-pkg-info" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                </div>
+                <button onclick="addNewSubPackageItem()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold cursor-pointer transition">Xaqiiji oo Ku Dar</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" id="bottom-nav-bar">
+        <button onclick="switchCategory('data')" class="nav-item active" id="bottom-btn-data">
+            <i class="fas fa-wifi" id="bottom-icon-data"></i>
+            <span id="bottom-text-data">Data</span>
+        </button>
+        <button onclick="switchCategory('books')" class="nav-item" id="bottom-btn-books">
+            <i class="fas fa-book" id="bottom-icon-books"></i>
+            <span id="bottom-text-books">Buugaagta</span>
+        </button>
+        <button class="nav-item call-btn" onclick="openBottomNavModal()">
+            <i class="fa-solid fa-phone-volume"></i>
+            <span>Wac / Bixi</span>
+        </button>
+    </nav>
+
+    <div class="modal-overlay" id="contactSupportModal" onclick="closeBottomNavModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-5 cursor-pointer" onclick="closeBottomNavModal(event)"></div>
+            <div class="modal-title">La xariir Adeega macaamiisha</div>
+            
+            <div class="modal-options">
+                <a href="https://wa.me/252610666653?text=Fadlan%20iigu%20soo%20fasax%20adeegga" class="option-box whatsapp-color" target="_blank">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>Whatsapp</span>
+                </a>
+                <a href="tel:0610666653" class="option-box phone-color">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>Wac Hadda</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PERSONAL_TARGET_PHONE = "20189087"; 
+        let selectedProductPrice = 0;
+        let activePaymentMethod = "";
+        let currentPackageHTML = "";
+        let currentItemType = ""; 
+        
+        let currentBookFilter = ""; 
+        let currentNetworkFilter = ""; 
+        let currentActiveServiceId = ""; 
+
+        let adminClickCount = 0;
+        let adminClickTimeout;
+        let currentAdminManageTab = "data"; 
+
+        function speakSomali(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'so-SO';
+                utterance.rate = 0.95;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function enforceNineDigits(elementId) {
+            const el = document.getElementById(elementId);
+            if(el) {
+                el.addEventListener('input', function() {
+                    if (this.value.length > 9) {
+                        this.value = this.value.slice(0, 9);
+                    }
+                });
+            }
+        }
+
+        const mainServices = [
+            { id: "kuhadal", title: "Ku Hadal", network: "Hormuud", color: "#00965e" },
+            { id: "anfac", title: "AnfacPlus GB", network: "Hormuud", color: "#00965e" },
+            { id: "adsl_arday", title: "ADSL Arday / IPTV", network: "Hormuud", color: "#00965e" },
+            { id: "adsl_plus", title: "ADSL PLUS", network: "Hormuud", color: "#00965e" },
+            { id: "unlimited", title: "Unlimited", network: "Hormuud", color: "#00965e" },
+            { id: "voice", title: "Recharge Voice", network: "Hormuud", color: "#00965e" },
+            { id: "kaafi_unlim", title: "Kaafi Unlimited", network: "Somnet", color: "#107acc" },
+            { id: "qanciye", title: "Qanciye Call+GB", network: "Somnet", color: "#107acc" }
+        ];
+
+        const booksList = [
+            { id: 201, title: "English Grammar Rules", price: 3.50, oldPrice: 5.00, desc: "School - Maadi - Baro naxwaha luuqada", category: "School", icon: "📚" },
+            { id: 202, title: "Spoken English Course", price: 5.00, oldPrice: 8.00, desc: "School - Maadi - Wada sheekaysiga goobaha", category: "School", icon: "🗣️" },
+            { id: 203, title: "Naxwaha Carabiga", price: 2.50, oldPrice: 4.00, desc: "Diini - Qawaacidda luuqada Carabiga", category: "Diini", icon: "🕌" }
+        ];
+
+        let subPackages = [
+            { id: 1, mainServiceId: "kuhadal", title: "8min", price: 0.09, oldPrice: 0.10, info: ["8 daqiiqo kuhadal", "30 maalin"], badge: "30 Maalin", color: "#00965e" },
+            { id: 2, mainServiceId: "kuhadal", title: "80min", price: 0.89, oldPrice: 1.00, info: ["80 daqiiqo kuhadal", "30 maalin"], badge: "30 Maalin", color: "#00965e" },
+            { id: 3, mainServiceId: "kuhadal", title: "400min", price: 4.50, oldPrice: 5.00, info: ["400 daqiiqo kuhadal", "30 maalin"], badge: "30 Maalin", color: "#00965e" },
+            { id: 4, mainServiceId: "anfac", title: "400MB", price: 0.22, oldPrice: 0.25, info: ["10 daqiiqo kuhadal", "1 maalin"], badge: "Maalinle", color: "#00965e" },
+            { id: 5, mainServiceId: "anfac", title: "850MB", price: 0.45, oldPrice: 0.50, info: ["30 daqiiqo kuhadal", "7 maalin"], badge: "Usbuucle", color: "#00965e" },
+            { id: 6, mainServiceId: "anfac", title: "2GB", price: 0.90, oldPrice: 1.00, info: ["80 daqiiqo kuhadal", "50 SMS", "7 maalin"], badge: "Usbuucle", color: "#00965e" },
+            { id: 7, mainServiceId: "anfac", title: "5GB", price: 1.80, oldPrice: 2.00, info: ["160 daqiiqo kuhadal", "100 SMS"], badge: "1 Bil", color: "#00965e" },
+            { id: 16, mainServiceId: "kaafi_unlim", title: "Unlimited", price: 0.65, oldPrice: 0.70, info: ["Internet aan xadidnayn", "Nasiye IPTV"], badge: "24 Saac", color: "#107acc" },
+            { id: 22, mainServiceId: "qanciye", title: "5.5GB", price: 1.80, oldPrice: 2.00, info: ["150 daqiiqo kuhadal", "35 SMS", "5.5GB data"], badge: "15 Maalin", color: "#107acc" }
+        ];
+
+        function resetFilters() {
+            document.querySelectorAll('.book-filter-btn, .net-filter-btn').forEach(btn => {
+                btn.className = "bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95";
+            });
+        }
+
+        function updateNavStyles(cat) {
+            const tabs = ['data', 'books'];
+            tabs.forEach(t => {
+                const headerBtn = document.getElementById(`nav-btn-${t}`);
+                const bottomBtn = document.getElementById(`bottom-btn-${t}`);
+                const icon = document.getElementById(`bottom-icon-${t}`);
+                const text = document.getElementById(`bottom-text-${t}`);
+                
+                if (t === cat) {
+                    headerBtn.className = "flex-1 py-4 bg-[#007d4e] text-white rounded-xl font-black text-sm cursor-pointer shadow transition border-2 border-white/60";
+                    bottomBtn.classList.add('active');
+                } else {
+                    headerBtn.className = "flex-1 py-4 bg-[#007d4e] text-white/80 rounded-xl font-black text-sm cursor-pointer shadow transition";
+                    bottomBtn.classList.remove('active');
+                }
+            });
+        }
+
+        function switchCategory(cat) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('phone-input-section').classList.add('hidden');
+            document.getElementById('admin-dashboard-section').classList.add('hidden'); 
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('bottom-nav-bar').classList.remove('hidden');
+            document.getElementById('sub-packages-view').classList.add('hidden');
+            
+            resetFilters();
+            updateNavStyles(cat);
+            currentItemType = cat;
+
+            if (cat === 'data') {
+                currentNetworkFilter = "";
+                document.getElementById('data-section').classList.add('active');
+                document.getElementById('data-services-grid').classList.remove('hidden');
+                document.getElementById('network-filters').classList.remove('hidden');
+                document.getElementById('data-services-grid').innerHTML = '';
+                speakSomali("Dooro shirkadda internetka.");
+            } else if (cat === 'books') {
+                currentBookFilter = "";
+                document.getElementById('books-section').classList.add('active');
+                document.getElementById('books-grid').innerHTML = '';
+                speakSomali("Dooro buugga aad rabto.");
+            }
+        }
+
+        function filterNetwork(net, event) {
+            currentNetworkFilter = net;
+            document.querySelectorAll(`.net-filter-btn`).forEach(btn => {
+                btn.className = "net-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95";
+            });
+            if(event) event.target.className = "net-filter-btn bg-[#00965e] text-white px-8 py-3 rounded-full text-sm font-black shadow cursor-pointer transition active:scale-95";
+            
+            document.getElementById('sub-packages-view').classList.add('hidden');
+            document.getElementById('data-services-grid').classList.remove('hidden');
+            
+            const grid = document.getElementById('data-services-grid');
+            grid.innerHTML = '';
+            
+            speakSomali("Waxaad dooratay " + net);
+
+            const filtered = mainServices.filter(s => s.network === net);
+            filtered.forEach(service => {
+                grid.innerHTML += `
+                <div onclick="openSubPackages('${service.id}', '${service.title}', '${service.color}', 'data')" style="background-color: ${service.color}" class="text-white p-5 rounded-2xl shadow-md flex flex-col items-center justify-center text-center cursor-pointer transition active:scale-95 min-h-[120px]">
+                    <h3 class="font-black text-xs tracking-wide uppercase">${service.title}</h3>
+                </div>`;
+            });
+        }
+
+        function filterBooks(category, event) {
+            currentBookFilter = category;
+            document.querySelectorAll(`.book-filter-btn`).forEach(btn => {
+                btn.className = "book-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95";
+            });
+            if(event) event.target.className = "book-filter-btn bg-[#00965e] text-white px-8 py-3 rounded-full text-sm font-black shadow cursor-pointer transition active:scale-95";
+            
+            const container = document.getElementById('books-grid');
+            container.innerHTML = '';
+            const filtered = booksList.filter(b => b.category === category);
+            
+            speakSomali("Buugaagta " + category);
+
+            filtered.forEach(book => {
+                container.innerHTML += `
+                <div onclick="openStandardProductModal('${book.title}', ${book.price}, ${book.oldPrice}, '${book.desc}', '${book.icon}', 'books')" class="bg-[#131926] rounded-2xl border border-white/10 p-5 shadow-sm flex justify-between items-center cursor-pointer hover:border-[#00965e] transition active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">${book.icon}</div>
+                        <div>
+                            <h4 class="font-black text-base text-white">${book.title}</h4>
+                            <p class="text-xs text-gray-400 font-medium">${book.desc}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[#00965e] font-black text-base">$${book.price.toFixed(2)}</span>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function openSubPackages(serviceId, serviceTitle, color, typeOrigin) {
+            currentActiveServiceId = serviceId;
+            currentItemType = typeOrigin; 
+            document.getElementById('data-services-grid').classList.add('hidden');
+            document.getElementById('network-filters').classList.add('hidden');
+            
+            const subView = document.getElementById('sub-packages-view');
+            subView.classList.remove('hidden');
+            document.getElementById('sub-view-title').innerText = serviceTitle;
+            
+            speakSomali("Xulo xirmada " + serviceTitle);
+
+            const listContainer = document.getElementById('sub-packages-list');
+            listContainer.innerHTML = '';
+            const filtered = subPackages.filter(p => p.mainServiceId === serviceId);
+
+            filtered.forEach(pkg => {
+                listContainer.innerHTML += `
+                <div onclick="openSubPackagePaymentModal('${pkg.title}', ${pkg.price}, ${pkg.oldPrice}, '${pkg.badge}', '', '${pkg.color || color}')" class="bg-[#131926] rounded-2xl shadow-lg flex overflow-hidden border border-white/10 cursor-pointer transition active:scale-95 relative h-26">
+                    <div style="background-color: ${pkg.color || color}" class="text-white w-[38%] flex flex-col justify-center pl-4 pr-2 card-cut relative z-10">
+                        <span class="text-[10px] bg-black/20 px-2 py-0.5 rounded-sm w-max font-black mb-1">${pkg.badge}</span>
+                        <h4 class="font-black text-base leading-none">${pkg.title}</h4>
+                    </div>
+                    <div class="flex-1 flex justify-between items-center px-6 relative z-0">
+                        <div class="text-white font-black text-lg">$${pkg.price.toFixed(2)}</div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function backToMainServices() {
+            document.getElementById('sub-packages-view').classList.add('hidden');
+            document.getElementById('data-services-grid').classList.remove('hidden');
+            document.getElementById('network-filters').classList.remove('hidden');
+        }
+
+        function openStandardProductModal(title, price, oldPrice, desc, icon, originType) {
+            selectedProductPrice = price;
+            currentItemType = originType; 
+            document.getElementById('selected-package-card-container').innerHTML = `<div class="bg-blue-600 p-4 rounded-xl text-white font-black text-center">${icon} ${title} - $${price}</div>`;
+            document.getElementById('payment-modal').classList.remove('hidden');
+            speakSomali(title + ". Qiimuhu waa " + price + " doolar.");
+        }
+
+        function openSubPackagePaymentModal(title, price, oldPrice, badge, info, color) {
+            selectedProductPrice = price;
+            document.getElementById('selected-package-card-container').innerHTML = `<div style="background-color:${color}" class="p-4 rounded-xl text-white font-black text-center">${title} - $${price}</div>`;
+            document.getElementById('payment-modal').classList.remove('hidden');
+            speakSomali("Xirmada " + title + ". Qiimuhu waa " + price + " doolar.");
+        }
+
+        function closePaymentModal() { document.getElementById('payment-modal').classList.add('hidden'); }
+
+        function goToPhoneInputForm(method) {
+            activePaymentMethod = method;
+            closePaymentModal();
+            document.getElementById('main-header').classList.add('hidden');
+            document.getElementById('data-section').classList.remove('active');
+            document.getElementById('books-section').classList.remove('active');
+            document.getElementById('bottom-nav-bar').classList.add('hidden');
+            document.getElementById('sub-packages-view').classList.add('hidden');
+            document.getElementById('phone-input-section').classList.remove('hidden');
+
+            const container = document.getElementById('dynamic-inputs-container');
+            if (currentItemType === "data") {
+                container.innerHTML = `
+                <input type="number" id="sender-phone" placeholder="Lambarkaaga (9 god)" class="w-full p-4 bg-[#182030] border border-white/10 rounded-xl text-white outline-none mb-4">
+                <input type="number" id="receiver-phone" placeholder="Lambarka loo shubayo (9 god)" class="w-full p-4 bg-[#182030] border border-white/10 rounded-xl text-white outline-none">`;
+            } else {
+                container.innerHTML = `
+                <input type="number" id="sender-phone" placeholder="Lambarkaaga (9 god)" class="w-full p-4 bg-[#182030] border border-white/10 rounded-xl text-white outline-none mb-4">
+                <input type="text" id="student-name" placeholder="Magacaaga dhamaystiran" class="w-full p-4 bg-[#182030] border border-white/10 rounded-xl text-white outline-none">`;
+            }
+            enforceNineDigits('sender-phone');
+            if(document.getElementById('receiver-phone')) enforceNineDigits('receiver-phone');
+            speakSomali("Fadlan geli macluumaadkaaga.");
+        }
+
+        function submitFinalPayment() {
+            const sender = document.getElementById('sender-phone').value.trim();
+            if (sender.length !== 9) { alert("Lambarku waa inuu ahaadaa 9 god!"); return; }
+            const dialCode = `*799*${PERSONAL_TARGET_PHONE}*${selectedProductPrice}%23`; 
+            window.location.href = `tel:${dialCode}`;
+
+            if (currentItemType === "books") {
+                const name = document.getElementById('student-name').value;
+                setTimeout(() => {
+                    window.location.href = `https://wa.me/252610666653?text=Dalab: ${name}, Nambarka: ${sender}`;
+                }, 3000);
+            }
+        }
+
+        function backToModalFromForm() {
+            document.getElementById('phone-input-section').classList.add('hidden');
+            switchCategory(currentItemType);
+        }
+
+        function handleAdminTrigger() {
+            adminClickCount++;
+            clearTimeout(adminClickTimeout);
+            if (adminClickCount === 3) {
+                adminClickCount = 0;
+                document.getElementById('admin-auth-modal').classList.remove('hidden');
+            } else { adminClickTimeout = setTimeout(() => adminClickCount = 0, 1000); }
+        }
+        
+        function closeAdminAuth() { document.getElementById('admin-auth-modal').classList.add('hidden'); }
+        
+        function verifyAdminPin() {
+            if (document.getElementById('admin-pin-input').value === "1234") { 
+                closeAdminAuth();
+                document.getElementById('main-header').classList.add('hidden');
+                document.getElementById('bottom-nav-bar').classList.add('hidden');
+                document.getElementById('admin-dashboard-section').classList.remove('hidden');
+                updateDashboardCounters();
+                renderAdminItemsList();
+            } else { alert("PIN waa qalad!"); }
+        }
+
+        function closeAdminDashboard() { switchCategory('data'); }
+
+        function openBottomNavModal() {
+            document.getElementById('contactSupportModal').classList.add('show');
+            speakSomali("Adeegga macaamiisha.");
+        }
+
+        function closeBottomNavModal() {
+            document.getElementById('contactSupportModal').classList.remove('show');
+        }
+
+        function updateDashboardCounters() {
+            document.getElementById('total-data-count').innerText = subPackages.length;
+            document.getElementById('total-books-count').innerText = booksList.length;
+        }
+
+        function switchAdminManageTab(tab) {
+            currentAdminManageTab = tab;
+            renderAdminItemsList();
+        }
+
+        function renderAdminItemsList() {
+            const container = document.getElementById('admin-items-list');
+            container.innerHTML = '';
+            const list = currentAdminManageTab === 'books' ? booksList : subPackages;
+            list.forEach((item, idx) => {
+                container.innerHTML += `<div class="bg-white/5 p-3 rounded-lg flex justify-between"><span>${item.title}</span><button onclick="deleteItem(${idx})" class="text-red-500">Tiri</button></div>`;
+            });
+        }
+
+        function deleteItem(index) {
+            if(currentAdminManageTab === 'books') booksList.splice(index, 1);
+            else subPackages.splice(index, 1);
+            updateDashboardCounters(); renderAdminItemsList();
+        }
+
+        switchCategory('data');
+    </script>
+</body>
+</html>
