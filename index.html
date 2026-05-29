@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arafat Multi-Store</title>
+    <link class="rounded-sm" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏪</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card-cut { clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-animate { animation: slideUp 0.3s ease-out forwards; }
+        
+        body { padding-bottom: 75px; }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 65px;
+            background-color: #131926; border-top: 1px solid #202c33;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 30px; box-sizing: border-box; z-index: 999;
+        }
+
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-decoration: none; color: #8696a0; font-size: 11px; font-weight: bold;
+            cursor: pointer; background: none; border: none; flex: 1;
+        }
+
+        .nav-item i { font-size: 20px; margin-bottom: 3px; }
+        .nav-item.active { color: #00965e; }
+        .nav-item.call-btn { color: #00965e; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); display: flex;
+            justify-content: center; align-items: flex-end; opacity: 0;
+            pointer-events: none; transition: opacity 0.3s ease; z-index: 1000;
+        }
+
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+
+        .modal-content {
+            width: 100%; max-width: 500px; background-color: #131926;
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            padding: 24px 20px 40px 20px; box-sizing: border-box;
+            transform: translateY(100%); transition: transform 0.3s ease; text-align: center;
+        }
+
+        .modal-overlay.show .modal-content { transform: translateY(0); }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-gray-200 font-sans min-h-screen">
+
+    <header id="main-header" class="bg-[#00965e] text-white pt-6 pb-6 px-4 shadow-md sticky top-0 z-40">
+        <div class="container mx-auto max-w-2xl text-center">
+            <h1 onclick="handleAdminTrigger()" class="text-2xl font-black tracking-wide flex items-center justify-center gap-2 mb-5 cursor-pointer select-none">
+                <i class="fas fa-store"></i> Dukaanka Arafat
+            </h1>
+            
+            <div class="flex gap-2.5 justify-center max-w-md mx-auto mb-1">
+                <button onclick="switchCategory('data')" id="nav-btn-data" class="flex-1 py-4 bg-[#007d4e] text-white rounded-xl font-black text-sm cursor-pointer shadow transition active:scale-95">
+                    <i class="fas fa-wifi"></i> Data
+                </button>
+                <button onclick="switchCategory('books')" id="nav-btn-books" class="flex-1 py-4 bg-[#007d4e] text-white/80 rounded-xl font-black text-sm cursor-pointer shadow transition active:scale-95">
+                    <i class="fas fa-book"></i> Buugaagta
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 max-w-2xl">
+        <!-- QAYBTA DATA-DA -->
+        <div id="data-section" class="tab-content">
+            <div id="network-filters" class="flex gap-3 mb-6 justify-center">
+                <button onclick="filterNetwork('Hormuud', event)" class="net-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Hormuud</button>
+                <button onclick="filterNetwork('Somnet', event)" class="net-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Somnet</button>
+            </div>
+            <div id="data-services-grid" class="grid grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- QAYBTA BUUGAAGTA -->
+        <div id="books-section" class="tab-content">
+            <div id="book-filters" class="flex gap-3 mb-6 justify-center">
+                <button onclick="filterBooks('Diini', event)" class="book-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Diini</button>
+                <button onclick="filterBooks('School', event)" class="book-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Maadi</button>
+            </div>
+            <div id="books-grid" class="grid grid-cols-1 gap-3"></div>
+        </div>
+
+        <!-- XIRMOOYINKA ADEEGGA -->
+        <div id="sub-packages-view" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/10 shadow-sm mb-2">
+                <h2 id="sub-view-title" class="text-sm font-black text-white uppercase tracking-wider">Xirmooyinka</h2>
+                <button onclick="backToMainServices()" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-xs font-black flex items-center gap-1 cursor-pointer transition active:scale-95">
+                    <i class="fas fa-arrow-left"></i> Ka Noqo
+                </button>
+            </div>
+            <div id="sub-packages-list" class="space-y-3"></div>
+        </div>
+
+        <!-- FORMKA GALINTA NAMBARKA -->
+        <div id="phone-input-section" class="hidden max-w-md mx-auto bg-[#131926] min-h-[70vh] p-5 rounded-2xl border border-white/10 relative">
+            <div class="flex items-center mb-6">
+                <button onclick="backToModalFromForm()" class="text-white text-xl p-3 hover:bg-white/10 rounded-full cursor-pointer transition active:scale-95">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <span id="form-flow-title" class="text-xs font-black ml-2 text-gray-400 uppercase tracking-wider">Xaqiijinta Lacagta</span>
+            </div>
+            <div id="dynamic-inputs-container" class="space-y-5"></div>
+            <div id="form-package-card-container" class="mt-6"></div>
+            <div class="mt-8">
+                <button onclick="submitFinalPayment()" class="w-full bg-[#00965e] text-white font-black py-4 rounded-full text-base shadow-md transition cursor-pointer active:scale-95">
+                    Xaqiiji oo Bixi Lacagta
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALKA LACAG BIXINTA -->
+    <div id="payment-modal" class="fixed inset-0 bg-black/70 hidden flex items-end justify-center z-50 p-0 backdrop-blur-xs transition-opacity duration-300">
+        <div class="bg-[#131926] w-full max-w-md rounded-t-3xl p-6 shadow-2xl modal-animate border-t border-white/10 text-white">
+            <div class="w-16 h-2 bg-gray-600 rounded-full mx-auto mb-6 cursor-pointer" onclick="closePaymentModal()"></div>
+            <div id="selected-package-card-container" class="mb-6"></div>
+            <h3 class="text-sm font-black text-gray-300 mb-4 text-left pl-1">Dooro habka lacag bixinta</h3>
+            <div class="space-y-4">
+                <button onclick="goToPhoneInputForm('EVC')" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-xl flex items-center justify-between cursor-pointer transition shadow-sm active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#00a2e8] text-white px-4 py-2.5 rounded-lg font-black text-base tracking-tight">EVC<span class="text-emerald-300">+</span></div>
+                        <span class="text-sm font-black text-gray-200">EVC Plus</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                </button>
+                <button onclick="goToPhoneInputForm('Jeeb')" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-xl flex items-center justify-between cursor-pointer transition shadow-sm active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#005ea6] text-white px-4 py-2.5 rounded-lg font-black text-base tracking-tight flex items-center gap-1">Jeeb</div>
+                        <span class="text-sm font-black text-gray-200">Jeeb</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                </button>
+            </div>
+            <button onclick="closePaymentModal()" class="w-full mt-5 bg-white/5 text-gray-400 font-black py-3.5 rounded-xl text-xs cursor-pointer border border-white/5">Ka Noqo</button>
+        </div>
+    </div>
+
+    <!-- ADMIN AUTH -->
+    <div id="admin-auth-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-xs">
+        <div class="bg-[#131926] w-full max-w-sm rounded-2xl p-6 border border-white/10 shadow-2xl">
+            <h3 class="text-base font-black text-white mb-2">Galitaanka Maamulka</h3>
+            <p class="text-xs text-gray-400 mb-4">Geli PIN-ka sirta ah.</p>
+            <input type="password" id="admin-pin-input" placeholder="Geli PIN-ka" class="w-full px-4 py-3 bg-[#182030] border border-white/10 rounded-xl text-white font-bold text-center outline-none focus:border-[#00965e] mb-4">
+            <div class="flex gap-2">
+                <button onclick="closeAdminAuth()" class="flex-1 py-3 bg-white/5 rounded-xl font-bold text-xs text-gray-400">Ka Noqo</button>
+                <button onclick="verifyAdminPin()" class="flex-1 py-3 bg-[#00965e] rounded-xl font-bold text-xs text-white">Geli</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div id="admin-dashboard-section" class="hidden container mx-auto p-4 max-w-2xl pb-28">
+        <div class="flex justify-between items-center bg-[#131926] p-4 rounded-xl border border-white/10 shadow-md mb-6">
+            <h2 class="text-sm font-black text-white uppercase tracking-wider">Dashboard-ka Maamulka</h2>
+            <button onclick="closeAdminDashboard()" class="px-4 py-2.5 bg-red-600/20 text-red-400 rounded-xl text-xs font-bold">Ka Bax</button>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mb-6 text-center">
+            <div class="bg-[#131926] p-3 rounded-xl border border-white/10">
+                <span class="text-[9px] text-gray-400 font-bold uppercase block mb-1">Xirmooyinka Data</span>
+                <span id="total-data-count" class="text-xl font-black text-white">0</span>
+            </div>
+            <div class="bg-[#131926] p-3 rounded-xl border border-white/10">
+                <span class="text-[9px] text-gray-400 font-bold uppercase block mb-1">Buugaagta</span>
+                <span id="total-books-count" class="text-xl font-black text-white">0</span>
+            </div>
+        </div>
+        <div id="admin-items-list" class="space-y-2 pr-1 text-xs"></div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav" id="bottom-nav-bar">
+        <button onclick="switchCategory('data')" class="nav-item active" id="bottom-btn-data">
+            <i class="fas fa-wifi" id="bottom-icon-data"></i>
+            <span id="bottom-text-data">Data</span>
+        </button>
+        <button onclick="switchCategory('books')" class="nav-item" id="bottom-btn-books">
+            <i class="fas fa-book" id="bottom-icon-books"></i>
+            <span id="bottom-text-books">Buugaagta</span>
+        </button>
+        <button class="nav-item call-btn" onclick="openBottomNavModal()">
+            <i class="fa-solid fa-phone-volume"></i>
+            <span>Wac / Bixi</span>
+        </button>
+    </nav>
+
+    <!-- SUPPORT MODAL -->
+    <div class="modal-overlay" id="contactSupportModal" onclick="closeBottomNavModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-5 cursor-pointer" onclick="closeBottomNavModal()"></div>
+            <div class="modal-title text-white">La xariir Adeegga Macaamiisha</div>
+            <div class="flex gap-4">
+                <a href="https://wa.me/252610666653" class="flex-1 bg-[#25d366] p-5 rounded-2xl text-white flex flex-col items-center">
+                    <i class="fa-brands fa-whatsapp text-3xl mb-1"></i><span>WhatsApp</span>
+                </a>
+                <a href="tel:0610666653" class="flex-1 bg-[#ff5722] p-5 rounded-2xl text-white flex flex-col items-center">
+                    <i class="fa-solid fa-phone text-3xl mb-1"></i><span>Wac Hadda</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PERSONAL_TARGET_PHONE = "20189087"; 
+        let selectedProductPrice = 0;
+        let currentItemType = ""; 
+        let currentActiveServiceId = ""; 
+        let adminClickCount = 0;
+        let adminClickTimeout;
+
+        // --- HADALKA AF-SOOMAALIGA (PHONETIC FLOW AI) ---
+        function speakSomali(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                // Isku day Somali voice, haddii kale isticmaal cod dabiici ah
+                utterance.lang = 'so-SO'; 
+                utterance.rate = 0.85; // Cod degan oo Flow ah
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function enforceNineDigits(elementId) {
+            const el = document.getElementById(elementId);
+            if(el) {
+                el.addEventListener('input', function() {
+                    if (this.value.length > 9) this.value = this.value.slice(0, 9);
+                });
+            }
+        }
+
+        const mainServices = [
+            { id: "kuhadal", title: "Ku Hadal", network: "Hormuud", color: "#00965e" },
+            { id: "anfac", title: "AnfacPlus GB", network: "Hormuud", color: "#00965e" },
+            { id: "adsl_arday", title: "ADSL Arday / IPTV", network: "Hormuud", color: "#00965e" },
+            { id: "adsl_plus", title: "ADSL PLUS", network: "Hormuud", color: "#00965e" },
+            { id: "unlimited", title: "Unlimited", network: "Hormuud", color: "#00965e" },
+            { id: "voice", title: "Recharge Voice", network: "Hormuud", color: "#00965e" },
+            { id: "kaafi_unlim", title: "Kaafi Unlimited", network: "Somnet", color: "#107acc" },
+            { id: "qanciye", title: "Qanciye Call+GB", network: "Somnet", color: "#107acc" }
+        ];
+
+        let booksList = [
+            { id: 201, title: "English Grammar Rules", price: 3.50, oldPrice: 5.00, desc: "Barashada naxwaha luuqada", category: "School", icon: "📚" },
+            { id: 202, title: "Spoken English Course", price: 5.00, oldPrice: 8.00, desc: "Wada sheekaysiga English-ka", category: "School", icon: "🗣️" },
+            { id: 203, title: "Naxwaha Carabiga", price: 2.50, oldPrice: 4.00, desc: "Qawaacidda luuqada Carabiga", category: "Diini", icon: "🕌" }
+        ];
+
+        let subPackages = [
+            { id: 1, mainServiceId: "kuhadal", title: "8 daqiiqo", price: 0.09, oldPrice: 0.10, info: ["8 daqiiqo kuhadal"], badge: "30 Maalin", color: "#00965e" },
+            { id: 2, mainServiceId: "kuhadal", title: "80 daqiiqo", price: 0.89, oldPrice: 1.00, info: ["80 daqiiqo kuhadal"], badge: "30 Maalin", color: "#00965e" },
+            { id: 4, mainServiceId: "anfac", title: "400MB", price: 0.22, oldPrice: 0.25, info: ["10 daqiiqo kuhadal"], badge: "Maalinle", color: "#00965e" },
+            { id: 7, mainServiceId: "anfac", title: "5GB", price: 1.80, oldPrice: 2.00, info: ["160 daqiiqo kuhadal"], badge: "1 Bil", color: "#00965e" },
+            { id: 16, mainServiceId: "kaafi_unlim", title: "Unlimited", price: 0.65, oldPrice: 0.70, info: ["Internet aan xadidnayn"], badge: "24 Saac", color: "#107acc" },
+            { id: 22, mainServiceId: "qanciye", title: "5.5GB", price: 1.80, oldPrice: 2.00, info: ["150 daqiiqo kuhadal", "5.5GB data"], badge: "15 Maalin", color: "#107acc" }
+        ];
+
+        function switchCategory(cat) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('phone-input-section').classList.add('hidden');
+            document.getElementById('admin-dashboard-section').classList.add('hidden'); 
+            document
