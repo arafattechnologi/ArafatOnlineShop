@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arafat Technology - Gallery Upload</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; }
+  .container { max-width: 500px; width: 100%; background: white; padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin-bottom: 20px; box-sizing: border-box; }
+  h2, h3 { text-align: center; color: #2c3e50; margin-top: 0; }
+
+  #inventorySection { display: none; } 
+  .admin-login-btn { background: none; border: none; color: #bdc3c7; font-size: 10px; cursor: pointer; float: right; padding: 5px; }
+  .admin-panel { background: #f0f7ff; border: 2px solid #3498db; border-radius: 20px; padding: 15px; margin-bottom: 10px; text-align: center; }
+  
+  .upload-area { width: 120px; height: 150px; border: 2px dashed #3498db; border-radius: 15px; margin: 10px auto; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; background: #fff; }
+  .upload-area img { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .upload-area span { color: #3498db; font-size: 12px; font-weight: bold; padding: 10px; text-align: center; }
+
+  .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .input-group input, .input-group select { padding: 12px; border-radius: 10px; border: 1px solid #ccc; font-size: 14px; }
+
+  .filter-section { margin-bottom: 15px; width: 100%; text-align: center; }
+  .filter-select { padding: 10px; border-radius: 10px; border: 2px solid #3498db; width: 100%; font-weight: bold; color: #2c3e50; }
+
+  .item { border: 1px solid #eee; padding: 15px; margin-top: 15px; border-radius: 20px; background: #fcfcfc; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; }
+  .book-preview { width: 120px; height: 160px; border-radius: 12px; object-fit: cover; background: #eee; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+  .row { display: flex; gap: 10px; align-items: center; width: 100%; }
+  .book-dropdown { flex: 2; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; background: white; width: 60%; }
+  .qty { width: 60px; padding: 12px; border-radius: 10px; border: 1px solid #ddd; text-align: center; }
+
+  button { cursor: pointer; font-weight: bold; border-radius: 12px; border: none; transition: 0.3s; padding: 12px; }
+  .btn-blue { background: #3498db; color: white; width: 100%; }
+  .btn-edit { background: #f39c12; color: white; padding: 5px; border-radius: 5px; font-size: 10px; }
+  .btn-purple { background: #9b59b6; color: white; width: 100%; margin-top: 10px; }
+  .btn-green { background: #27ae60; color: white; width: 100%; margin-top: 15px; font-size: 18px; }
+  .btn-remove { background: #ff7675; color: white; padding: 8px 15px; font-size: 12px; border-radius: 10px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+  th { background: #f8f9fa; padding: 8px; border-bottom: 2px solid #eee; text-align: left; }
+  td { padding: 8px; border-bottom: 1px solid #eee; }
+
+  .total-box { background: #2c3e50; color: white; text-align: center; padding: 20px; margin-top: 20px; border-radius: 18px; width: 100%; box-sizing: border-box; }
+  .total-box span { font-size: 26px; color: #2ecc71; }
+
+  .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+  .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 380px; }
+</style>
+</head>
+<body>
+
+<div class="container" id="inventorySection">
+  <button class="btn-remove" onclick="logoutAdmin()" style="float:right">Xir 🚪</button>
+  <h3>📦 Maamulka Kaydka</h3>
+  
+  <div class="admin-panel">
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+      <span id="uploadText">Guji si aad sawir u soo xulato 📸</span>
+      <img id="previewAdmin" src="">
+    </div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewFile()">
+
+    <div class="input-group">
+      <input type="text" id="invName" placeholder="Magaca Buugga">
+      <input type="number" id="invPrice" placeholder="Qiimaha $">
+      <select id="invCat">
+          <option value="School">🏫 School</option>
+          <option value="Diini">🕌 Diini</option>
+          <option value="Aqoon">💡 Aqoon Guud</option>
+      </select>
+    </div>
+    <button class="btn-blue" onclick="addToStore()">➕ Ku dar Kaydka</button>
+  </div>
+
+  <div style="max-height: 250px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px;">
+    <table>
+      <thead><tr><th>Sawir</th><th>Magaca</th><th>Qayb</th><th>Qiimo</th><th>Action</th></tr></thead>
+      <tbody id="manageBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="container">
+  <button class="admin-login-btn" onclick="loginAdmin()">Admin Login 🔐</button>
+  <h2>📚 Arafat BookShop</h2>
+  <div class="filter-section">
+    <select class="filter-select" id="mainFilter" onchange="applyFilter()">
+      <option value="All">Dhammaan Buugaagta ✨</option>
+      <option value="School">🏫 Buugaagta School-ka</option>
+      <option value="Diini">🕌 Kutubta Diiniga</option>
+      <option value="Aqoon">💡 Aqoon Guud</option>
+    </select>
+  </div>
+  <div id="shopList"></div>
+  <button class="btn-purple" onclick="addNewRow()">➕ Ku dar Buug kale</button>
+  <div class="total-box">Wartarka Guud: <b>$<span id="grandTotal">0.00</span></b></div>
+  <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+    <input type="tel" id="custPhone" placeholder="Nambarka EVC (61XXXXXXX)" maxlength="15" style="width:100%; padding:14px; border-radius:12px; border:1px solid #ddd; text-align:center; font-size:18px; box-sizing: border-box;">
+    <button class="btn-green" onclick="initiateOrder()">🛒 Dalbo Hadda</button>
+  </div>
+</div>
+
+<div id="payModal" class="modal">
+  <div class="modal-content">
+    <h3>Xaqiiji Dalabka</h3>
+    <p>Total: <b>$<span id="confirmAmt"></span></b></p>
+    <button class="btn-green" style="width:100%" onclick="processPayment()">Haa, bixi</button>
+    <button class="btn-remove" onclick="closeModal()" style="width:100%; margin-top:10px;">Iska jooji</button>
+  </div>
+</div>
+
+<script>
+  let currentBase64 = "";
+  let storeBooks = JSON.parse(localStorage.getItem('inventory')) || [];
+
+  function previewFile() {
+    const file = document.getElementById('fileInput').files[0];
+    const preview = document.getElementById('previewAdmin');
+    const uploadText = document.getElementById('uploadText');
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = "block";
+        uploadText.style.display = "none";
+        currentBase64 = e.target.result;
+      }
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function loginAdmin() {
+    let password = prompt("Geli Password-ka:");
+    if (password === (localStorage.getItem('adminPass') || "1234")) {
+      document.getElementById("inventorySection").style.display = "block";
+      renderManageTable();
+    }
+  }
+
+  function logoutAdmin() { document.getElementById("inventorySection").style.display = "none"; }
+
+  function addToStore() {
+    let name = document.getElementById("invName").value;
+    let price = document.getElementById("invPrice").value;
+    let cat = document.getElementById("invCat").value;
+    if (!name || !price || !currentBase64) {
+        alert("Fadlan buuxi magaca, qiimaha iyo sawirka!");
+        return;
+    }
+    storeBooks.push({ name, price: parseFloat(price), img: currentBase64, category: cat });
+    localStorage.setItem('inventory', JSON.stringify(storeBooks));
+    alert("Buugga waa lagu daray!");
+    renderManageTable();
+    document.getElementById("invName").value = "";
+    document.getElementById("invPrice").value = "";
+    document.getElementById("previewAdmin").style.display = "none";
+    document.getElementById("uploadText").style.display = "block";
+    currentBase64 = "";
+  }
+
+  function renderManageTable() {
+    let tbody = document.getElementById("manageBody");
+    tbody.innerHTML = "";
+    storeBooks.forEach((book, index) => {
+      tbody.innerHTML += `<tr>
+        <td><img src="${book.img}" style="width:30px;height:40px;object-fit:cover;"></td>
+        <td>${book.name}</td><td>${book.category}</td><td>$${book.price}</td>
+        <td><button class="btn-edit" onclick="deleteBook(${index})">X</button></td>
+      </tr>`;
+    });
+  }
+
+  function deleteBook(index) {
+    storeBooks.splice(index, 1);
+    localStorage.setItem('inventory', JSON.stringify(storeBooks));
+    renderManageTable();
+  }
+
+  function applyFilter() {
+    document.getElementById("shopList").innerHTML = "";
+    addNewRow();
+  }
+
+  function addNewRow() {
+    if(storeBooks.length === 0) return alert("Ma jiraan buugaag!");
+    let filter = document.getElementById("mainFilter").value;
+    let filtered = filter === "All" ? storeBooks : storeBooks.filter(b => b.category === filter);
+    if(filtered.length === 0) return alert("Ma jiraan buugaag qaybtan!");
+    let div = document.createElement("div");
+    div.className = "item";
+    let options = filtered.map(b => `<option value="${b.price}" data-img="${b.img}">${b.name} ($${b.price})</option>`).join("");
+    div.innerHTML = `
+      <img src="${filtered[0].img}" class="book-preview">
+      <div class="row">
+        <select class="book-dropdown" onchange="updateRow(this)">${options}</select>
+        <input type="number" class="qty" value="1" min="1" oninput="calcTotal()">
+      </div>
+      <button class="btn-remove" onclick="this.parentElement.remove(); calcTotal();">Ka saar 🗑️</button>
+    `;
+    document.getElementById("shopList").appendChild(div);
+    calcTotal();
+  }
+
+  function updateRow(s) {
+    s.parentElement.parentElement.querySelector(".book-preview").src = s.options[s.selectedIndex].getAttribute("data-img");
+    calcTotal();
+  }
+
+  function calcTotal() {
+    let t = 0;
+    document.querySelectorAll(".item").forEach(i => {
+      t += (parseFloat(i.querySelector(".book-dropdown").value) || 0) * (parseInt(i.querySelector(".qty").value) || 1);
+    });
+    document.getElementById("grandTotal").innerText = t.toFixed(2);
+  }
+
+  function initiateOrder() {
+    let phone = document.getElementById("custPhone").value.trim();
+    if (phone.length < 9 || isNaN(phone)) return alert("Geli nambar EVC sax ah.");
+    document.getElementById("confirmAmt").innerText = document.getElementById("grandTotal").innerText;
+    document.getElementById("payModal").style.display = "flex";
+  }
+
+  function processPayment() {
+    let t = Math.round(parseFloat(document.getElementById("grandTotal").innerText));
+    let phoneNumber = "*712*685270000*";
+    let fullCode = `tel:${phoneNumber}${t}#`;
+    
+    closeModal();
+    window.location.href = fullCode;
+    console.log("Waxaa la dirayaa codsiga: " + fullCode);
+  }
+
+  function closeModal() { document.getElementById("payModal").style.display = "none"; }
+
+  window.onload = () => { if(storeBooks.length > 0) addNewRow(); };
+</script>
+</body>
+</html>
+    
