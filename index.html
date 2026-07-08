@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arafat Multi-Store</title>
+    <title>Arafat Online Shop </title>
     <link class="rounded-sm" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏪</text></svg>">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -150,7 +150,7 @@
     <header id="main-header" class="bg-[#00965e] text-white pt-6 pb-6 px-4 shadow-md sticky top-0 z-40">
         <div class="container mx-auto max-w-2xl text-center">
             <h1 onclick="handleAdminTrigger()" class="text-2xl font-black tracking-wide flex items-center justify-center gap-2 mb-5 cursor-pointer select-none">
-                <i class="fas fa-store"></i> Arafat Multi-Store
+                <i class="fas fa-store"></i> Arafat Online Shop
             </h1>
             
             <div class="flex gap-2.5 justify-center max-w-md mx-auto mb-1">
@@ -456,17 +456,17 @@
             { id: "qanciye", title: "Qanciye Call+GB", network: "Somnet", color: "#107acc" }
         ];
 
-        // 2. BOOKS MASTER RECORDS
-        const booksList = [
-            { id: 201, title: "English Grammar Rules", price: 3.50, oldPrice: 5.00, desc: "School - Maadi - Baro naxwaha luuqada", category: "School", icon: "📚" },
-            { id: 202, title: "Spoken English Course", price: 5.00, oldPrice: 8.00, desc: "School - Maadi - Wada sheekaysiga goobaha", category: "School", icon: "🗣️" },
-            { id: 203, title: "Naxwaha Carabiga", price: 2.50, oldPrice: 4.00, desc: "Diini - Qawaacidda luuqada Carabiga", category: "Diini", icon: "🕌" }
+        // 2. PRODUCTS MASTER RECORDS
+        const productsList = [
+            { id: 201, title: "Firsho", price: 3.50, oldPrice: 5.00, desc: "Qashin - Sanjabiil", category: "Kul", icon: "📚" },
+            { id: 202, title: "Caraf", price: 5.00, oldPrice: 8.00, desc: "Qashin - Dhegayare - Carfiye", category: "Caraffis", icon: "🗣️" },
+            { id: 203, title: "Dawo", price: 50, oldPrice: 70.00, desc: "Qashin - Malab", category: "macaan", icon: "🕌" }
         ];
 
         // 3. VIDEO COURSES RECORDS
         const videoCoursesList = [
-            { id: 301, title: "English Grammar Video Course", price: 3.50, oldPrice: 5.00, desc: "Macalin: Axmed - Baro xeerarka naxwaha", category: "Language", icon: "📚" },
-            { id: 302, title: "Spoken English Masterclass", price: 5.00, oldPrice: 8.00, desc: "Macalin: Cali - Wada sheekaysiga maalin laha ah", category: "Language", icon: "🗣️" },
+            { id: 301, title: "English Grammar Video Course", price: 3.50, oldPrice: 5.00, desc: "Gramaar Made Easy - Baro xeerarka naxwaha Englishka", category: "Language", icon: "📚" },
+            { id: 302, title: "Photoshp", price: 5.00, oldPrice: 8.00, desc: "Design - Practical", category: "grahic", icon: "🗣️" },
             { id: 303, title: "Web Development HTML/CSS", price: 12.50, oldPrice: 20.00, desc: "Baro qaabka loo dhiso website-yada goobtaada", category: "Tech", icon: "💻" }
         ];
 
