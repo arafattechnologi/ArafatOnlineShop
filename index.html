@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carafat Group</title>
+    <link class="rounded-sm" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏪</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .card-cut { clip-path: polygon(0 0, 85% 0, 100% 100%, 0 100%); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-animate { animation: slideUp 0.3s ease-out forwards; }
+        
+        body {
+            padding-bottom: 75px; 
+        }
+
+        /* Bottom Navigation Style */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 65px;
+            background-color: #131926;
+            border-top: 1px solid #202c33;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-sizing: border-box;
+            z-index: 999;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #8696a0;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            flex: 1;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+
+        .nav-item.active {
+            color: #00965e;
+        }
+
+        .nav-item.call-btn {
+            color: #00965e;
+        }
+
+        /* Modal Bottom Sheet */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 500px;
+            background-color: #131926;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 24px 20px 40px 20px;
+            box-sizing: border-box;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 24px;
+        }
+
+        .modal-options {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .option-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .option-box.whatsapp-color {
+            background-color: #25d366;
+        }
+
+        .option-box.phone-color {
+            background-color: #ff5722;
+        }
+
+        .option-box i {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-gray-200 font-sans min-h-screen">
+
+    <header id="main-header" class="bg-[#00965e] text-white pt-6 pb-6 px-4 shadow-md sticky top-0 z-40">
+        <div class="container mx-auto max-w-2xl text-center">
+            <h1 onclick="handleAdminTrigger()" class="text-2xl font-black tracking-wide flex items-center justify-center gap-2 mb-5 cursor-pointer select-none">
+                <i class="fas fa-store"></i> Carafat Group
+              
+            </h1>
+            
+            <div class="flex gap-2.5 justify-center max-w-md mx-auto mb-1">
+                <button onclick="switchCategory('data')" id="nav-btn-data" class="flex-1 py-4 bg-[#007d4e] text-white rounded-xl font-black text-sm cursor-pointer shadow transition active:scale-95">
+                    <i class="fas  fa-wifi"></i> Data
+                </button>
+                <button onclick="switchCategory('books')" id="nav-btn-books" class="flex-1 py-4 bg-[#007d4e] text-white/80 rounded-xl font-black text-sm cursor-pointer shadow transition active:scale-95">
+                    <i class="fas fa-book"></i> Books
+                </button>
+                <button onclick="switchCategory('courses')" id="nav-btn-courses" class="flex-1 py-4 bg-[#007d4e] text-white/80 rounded-xl font-black text-sm cursor-pointer shadow transition active:scale-95">
+                    <i class="fas fa-graduation-cap"></i> Courses
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 max-w-2xl">
+
+        <div id="data-section" class="tab-content">
+            <div id="network-filters" class="flex gap-3 mb-6 justify-center">
+                <button onclick="filterNetwork('Hormuud', event)" class="net-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Hormuud</button>
+                <button onclick="filterNetwork('Somnet', event)" class="net-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Somnet</button>
+            </div>
+            <div id="data-services-grid" class="grid grid-cols-2 gap-4"></div>
+        </div>
+
+        <div id="books-section" class="tab-content">
+            <div id="book-filters" class="flex gap-3 mb-6 justify-center">
+                <button onclick="filterBooks('Diini', event)" class="book-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Diini</button>
+                <button onclick="filterBooks('School', event)" class="book-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95">Maadi</button>
+            </div>
+            <div id="books-grid" class="grid grid-cols-1 gap-3"></div>
+        </div>
+
+        <div id="courses-section" class="tab-content">
+            <div id="course-filters" class="flex gap-2.5 mb-6 justify-center">
+                <button onclick="filterCourses('Language', event)" class="course-filter-btn bg-white/10 text-gray-300 border border-white/10 px-5 py-3 rounded-full text-xs font-black cursor-pointer transition active:scale-95">Luuqadaha</button>
+                <button onclick="filterCourses('Tech', event)" class="course-filter-btn bg-white/10 text-gray-300 border border-white/10 px-5 py-3 rounded-full text-xs font-black cursor-pointer transition active:scale-95">Tiknoolajiyada</button>
+                <button onclick="filterCourses('Live', event)" class="course-filter-btn bg-white/10 text-gray-300 border border-white/10 px-5 py-3 rounded-full text-xs font-black cursor-pointer transition active:scale-95">Live Classes</button>
+            </div>
+            <div id="courses-grid" class="grid grid-cols-1 gap-3"></div>
+        </div>
+
+        <div id="sub-packages-view" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/10 shadow-sm mb-2">
+                <h2 id="sub-view-title" class="text-sm font-black text-white uppercase tracking-wider">Xirmooyinka Adeegga</h2>
+                <button onclick="backToMainServices()" class="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl text-xs font-black flex items-center gap-1 cursor-pointer transition active:scale-95">
+                    <i class="fas fa-arrow-left"></i> Ka Noqo
+                </button>
+            </div>
+            <div id="sub-packages-list" class="space-y-3"></div>
+        </div>
+
+        <div id="phone-input-section" class="hidden max-w-md mx-auto bg-[#131926] min-h-[70vh] p-5 rounded-2xl border border-white/10 relative">
+            <div class="flex items-center mb-6">
+                <button onclick="backToModalFromForm()" class="text-white text-xl p-3 hover:bg-white/10 rounded-full cursor-pointer transition active:scale-95">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <span id="form-flow-title" class="text-xs font-black ml-2 text-gray-400 uppercase tracking-wider">Xaqiijinta Lacag Bixinta</span>
+            </div>
+
+            <div id="dynamic-inputs-container" class="space-y-5"></div>
+            <div id="form-package-card-container" class="mt-6"></div>
+
+            <div class="mt-8">
+                <button onclick="submitFinalPayment()" class="w-full bg-[#00965e] text-white font-black py-4 rounded-full text-base shadow-md transition cursor-pointer active:scale-95 flex items-center justify-center gap-2">
+                    Xaqiiji oo Bixi Lacagta
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="payment-modal" class="fixed inset-0 bg-black/70 hidden flex items-end justify-center z-50 p-0 backdrop-blur-xs transition-opacity duration-300">
+        <div class="bg-[#131926] w-full max-w-md rounded-t-3xl p-6 shadow-2xl modal-animate border-t border-white/10 text-white">
+            <div class="w-16 h-2 bg-gray-600 rounded-full mx-auto mb-6 cursor-pointer" onclick="closePaymentModal()"></div>
+            
+            <div id="selected-package-card-container" class="mb-6"></div>
+
+            <h3 class="text-sm font-black text-gray-300 mb-4 text-left pl-1">Dooro habka lacag bixinta</h3>
+            
+            <div class="space-y-4">
+                <button onclick="goToPhoneInputForm('EVC')" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-xl flex items-center justify-between cursor-pointer transition shadow-sm active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#00a2e8] text-white px-4 py-2.5 rounded-lg font-black text-base tracking-tight">EVC<span class="text-emerald-300">+</span></div>
+                        <span class="text-sm font-black text-gray-200">EVC Plus</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                </button>
+
+                <button onclick="goToPhoneInputForm('Jeeb')" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 p-4 rounded-xl flex items-center justify-between cursor-pointer transition shadow-sm active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-[#005ea6] text-white px-4 py-2.5 rounded-lg font-black text-base tracking-tight flex items-center gap-1"><i class="fas fa-mobile-alt text-sm"></i>Jeeb</div>
+                        <span class="text-sm font-black text-gray-200">Jeeb</span>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                </button>
+            </div>
+
+            <button onclick="closePaymentModal()" class="w-full mt-5 bg-white/5 hover:bg-white/10 text-gray-400 font-black py-3.5 rounded-xl text-xs cursor-pointer transition border border-white/5">Ka Noqo</button>
+        </div>
+    </div>
+
+    <div id="admin-auth-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-xs">
+        <div class="bg-[#131926] w-full max-w-sm rounded-2xl p-6 border border-white/10 shadow-2xl">
+            <h3 class="text-base font-black text-white mb-2 flex items-center gap-2"><i class="fas fa-lock text-emerald-500"></i> Galitaanka Maamulka</h3>
+            <p class="text-xs text-gray-400 mb-4">Geli PIN-ka sirta ah ee maamulka si aad u sii gudubto.</p>
+            <input type="password" id="admin-pin-input" placeholder="Geli PIN-ka" class="w-full px-4 py-3 bg-[#182030] border border-white/10 rounded-xl text-white font-bold tracking-widest text-center outline-none focus:border-[#00965e] mb-4">
+            <div class="flex gap-2">
+                <button onclick="closeAdminAuth()" class="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl font-bold text-xs text-gray-400 border border-white/5 cursor-pointer">Ka Noqo</button>
+                <button onclick="verifyAdminPin()" class="flex-1 py-3 bg-[#00965e] hover:bg-[#007d4e] rounded-xl font-bold text-xs text-white cursor-pointer">Geli</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-dashboard-section" class="hidden container mx-auto p-4 max-w-2xl pb-28">
+        <div class="flex justify-between items-center bg-[#131926] p-4 rounded-xl border border-white/10 shadow-md mb-6">
+            <div>
+                <h2 class="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2"><i class="fas fa-chart-line text-emerald-500"></i> Control Dashboard Panel</h2>
+                <p class="text-[11px] text-gray-400">Maamul alaabta dukaanka, koorsooyinka iyo xirmooyinka data-da.</p>
+            </div>
+            <button onclick="closeAdminDashboard()" class="px-4 py-2.5 bg-red-600/20 hover:bg-red-600/30 border border-red-500/30 text-red-400 rounded-xl text-xs font-bold cursor-pointer">
+                Ka Bax
+            </button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mb-6 text-center">
+            <div class="bg-[#131926] p-3 rounded-xl border border-white/10">
+                <span class="text-[9px] text-gray-400 font-bold uppercase block mb-1">Data Packages</span>
+                <span id="total-data-count" class="text-xl font-black text-white">20</span>
+            </div>
+            <div class="bg-[#131926] p-3 rounded-xl border border-white/10">
+                <span class="text-[9px] text-gray-400 font-bold uppercase block mb-1">Books Item</span>
+                <span id="total-books-count" class="text-xl font-black text-white">3</span>
+            </div>
+            <div class="bg-[#131926] p-3 rounded-xl border border-white/10">
+                <span class="text-[9px] text-gray-400 font-bold uppercase block mb-1">Courses Item</span>
+                <span id="total-courses-count" class="text-xl font-black text-white">6</span>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-[#131926] p-5 rounded-2xl border border-white/10 shadow-md">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2 text-red-400"><i class="fas fa-tasks"></i> Maamul Alaabta Jirta</h3>
+                <div class="flex gap-2 mb-4">
+                    <button onclick="switchAdminManageTab('data')" id="admin-tab-data" class="flex-1 py-2.5 bg-[#00965e] text-white rounded-lg font-bold text-xs cursor-pointer text-center">Data</button>
+                    <button onclick="switchAdminManageTab('books')" id="admin-tab-books" class="flex-1 py-2.5 bg-white/5 text-gray-400 rounded-lg font-bold text-xs cursor-pointer text-center">Buugaagta</button>
+                    <button onclick="switchAdminManageTab('courses')" id="admin-tab-courses" class="flex-1 py-2.5 bg-white/5 text-gray-400 rounded-lg font-bold text-xs cursor-pointer text-center">Koorsooyinka</button>
+                </div>
+                <div id="admin-items-list" class="max-h-60 overflow-y-auto space-y-2 pr-1 text-xs"></div>
+            </div>
+
+            <div class="bg-[#131926] p-5 rounded-2xl border border-white/10 shadow-md">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2 text-emerald-400"><i class="fas fa-plus-circle"></i> Ku Dar Buug ama Koorsada Duuban</h3>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Magaca Alaabta</label>
+                        <input type="text" id="new-item-title" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Nooca Qaybta (Target Segment)</label>
+                        <select id="new-item-type-select" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                            <option value="data-books:Diini">Buug - Diini</option>
+                            <option value="data-books:School">Buug - Maadi (School)</option>
+                            <option value="data-courses:Language">Koorsada Video - Luuqadaha</option>
+                            <option value="data-courses:Tech">Koorsada Video - Tiknoolajiyada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Qiimaha ($)</label>
+                        <input type="number" step="0.01" id="new-item-price" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Qiimihii Hore ($)</label>
+                        <input type="number" step="0.01" id="new-item-oldprice" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Astaanta (Emoji / Icon)</label>
+                        <input type="text" id="new-item-icon" value="📖" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white text-center outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-3 mb-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Faahfaahin Gaaban</label>
+                        <input type="text" id="new-item-desc" placeholder="Tusaale: Baro naxwaha luuqada ama magaca macalinka" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                </div>
+                <button onclick="addGenericProductItem()" class="w-full py-3 bg-[#00965e] hover:bg-[#007d4e] text-white rounded-xl text-xs font-bold cursor-pointer transition">Xaqiiji oo Ku Dar</button>
+            </div>
+
+            <div class="bg-[#131926] p-5 rounded-2xl border border-white/10 shadow-md">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2 text-blue-400"><i class="fas fa-plus-circle"></i> Ku Dar Xirmo Data ama Fasal Live ah</h3>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Adeegga Wayn (Main Parent Service)</label>
+                        <select id="new-pkg-service-id" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                            <option value="kuhadal">Ku Hadal (Hormuud Data)</option>
+                            <option value="anfac">AnfacPlus GB (Hormuud Data)</option>
+                            <option value="adsl_arday">ADSL Arday / IPTV (Hormuud Data)</option>
+                            <option value="adsl_plus">ADSL PLUS (Hormuud Data)</option>
+                            <option value="unlimited">Unlimited (Hormuud Data)</option>
+                            <option value="voice">Recharge Voice (Hormuud Data)</option>
+                            <option value="kaafi_unlim">Kaafi Unlimited (Somnet Data)</option>
+                            <option value="qanciye">Qanciye Call+GB (Somnet Data)</option>
+                            <option value="Private">Private 1-on-1 (Courses Live)</option>
+                            <option value="Group">Group Classes (Courses Live)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Xaddiga / Magaca Xirmada</label>
+                        <input type="text" id="new-pkg-title" placeholder="Tusaale: 5GB ama English Private" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Qiimaha ($)</label>
+                        <input type="number" step="0.01" id="new-pkg-price" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Qiimihii Hore ($)</label>
+                        <input type="number" step="0.01" id="new-pkg-oldprice" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Sumadda (Badge)</label>
+                        <input type="text" id="new-pkg-badge" placeholder="Tusaale: 1 Bil / Maalinle" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-3 mb-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">Waxa ku jira xirmada (Ku kala saar kooma ",")</label>
+                        <input type="text" id="new-pkg-info" placeholder="Tusaale: 160 daqiiqo kuhadal, Shahaado dhamaadka, 1 Bil" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none">
+                    </div>
+                </div>
+                <button onclick="addNewSubPackageItem()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold cursor-pointer transition">Xaqiiji oo Ku Dar Xirmada</button>
+            </div>
+
+            <div class="bg-[#131926] p-5 rounded-2xl border border-white/10 shadow-md">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider mb-4 border-b border-white/5 pb-2 text-yellow-500"><i class="fas fa-key"></i> Beddel PIN-ka Maamulka</h3>
+                <div class="grid grid-cols-1 gap-3 mb-4">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">PIN-ka Cusub (Password)</label>
+                        <input type="password" id="new-admin-pin-field" placeholder="Geli PIN cusub" class="w-full p-2 bg-[#182030] border border-white/10 rounded-lg text-xs font-semibold text-white outline-none focus:border-[#00965e]">
+                    </div>
+                </div>
+                <button onclick="changeAdminPassword()" class="w-full py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-xl text-xs font-bold cursor-pointer transition">Cusboonaysii PIN-ka</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav" id="bottom-nav-bar">
+        <button onclick="switchCategory('data')" class="nav-item active" id="bottom-btn-data">
+            <i class="fas fa-wifi" id="bottom-icon-data"></i>
+            <span id="bottom-text-data">Data</span>
+        </button>
+        <button onclick="switchCategory('books')" class="nav-item" id="bottom-btn-books">
+            <i class="fas fa-book" id="bottom-icon-books"></i>
+            <span id="bottom-text-books">Books</span>
+        </button>
+        <button onclick="switchCategory('courses')" class="nav-item" id="bottom-btn-courses">
+            <i class="fas fa-graduation-cap" id="bottom-icon-courses"></i>
+            <span id="bottom-text-courses">Courses</span>
+        </button>
+        <button class="nav-item call-btn" onclick="openBottomNavModal()">
+            <i class="fa-solid fa-phone-volume"></i>
+            <span>Wac / Bixi</span>
+        </button>
+    </nav>
+
+    <div class="modal-overlay" id="contactSupportModal" onclick="closeBottomNavModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-5 cursor-pointer" onclick="closeBottomNavModal(event)"></div>
+            <div class="modal-title">La xariir qeebta Adeega macaamiisha</div>
+            
+            <div class="modal-options">
+                <a href="https://wa.me/252610666653?text=Fadlan%20iigu%20soo%20fasax%20adeegga" class="option-box whatsapp-color" target="_blank">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>Whatsapp</span>
+                </a>
+                <a href="tel:0610666653" class="option-box phone-color">
+                    <i class="fa-solid fa-phone"></i>
+                    <span>Phone Call</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let adminPassword = localStorage.getItem("adminPass") || "1234";
+        const PERSONAL_TARGET_PHONE = "20189087"; 
+        let selectedProductPrice = 0;
+        let activePaymentMethod = "";
+        let currentPackageHTML = "";
+        let currentItemType = ""; 
+        
+        let currentBookFilter = ""; 
+        let currentNetworkFilter = ""; 
+        let currentCourseFilter = "";
+        let currentActiveServiceId = ""; 
+
+        let adminClickCount = 0;
+        let adminClickTimeout;
+        let currentAdminManageTab = "data"; 
+
+        // 1. DATA MASTER RECORDS
+        const mainServices = [
+            { id: "kuhadal", title: "Ku Hadal", network: "Hormuud", color: "#00965e" },
+            { id: "anfac", title: "AnfacPlus GB", network: "Hormuud", color: "#00965e" },
+            { id: "adsl_arday", title: "ADSL Arday / IPTV", network: "Hormuud", color: "#00965e" },
+            { id: "adsl_plus", title: "ADSL PLUS", network: "Hormuud", color: "#00965e" },
+            { id: "unlimited", title: "Unlimited", network: "Hormuud", color: "#00965e" },
+            { id: "voice", title: "Recharge Voice", network: "Hormuud", color: "#00965e" },
+            { id: "kaafi_unlim", title: "Kaafi Unlimited", network: "Somnet", color: "#107acc" },
+            { id: "qanciye", title: "Qanciye Call+GB", network: "Somnet", color: "#107acc" }
+        ];
+
+        // 2. BOOKS MASTER RECORDS
+        const booksList = [
+            { id: 201, title: "English Grammar Rules", price: 3.50, oldPrice: 5.00, desc: "School - Maadi - Baro naxwaha luuqada", category: "School", icon: "📚" },
+            { id: 202, title: "Spoken English Course", price: 5.00, oldPrice: 8.00, desc: "School - Maadi - Wada sheekaysiga goobaha", category: "School", icon: "🗣️" },
+            { id: 203, title: "Naxwaha Carabiga", price: 2.50, oldPrice: 4.00, desc: "Diini - Qawaacidda luuqada Carabiga", category: "Diini", icon: "🕌" }
+        ];
+
+        // 3. VIDEO COURSES RECORDS
+        const videoCoursesList = [
+            { id: 301, title: "English Grammar Video Course", price: 3.50, oldPrice: 5.00, desc: "Macalin: Axmed - Baro xeerarka naxwaha", category: "Language", icon: "📚" },
+            { id: 302, title: "Spoken English Masterclass", price: 5.00, oldPrice: 8.00, desc: "Macalin: Cali - Wada sheekaysiga maalin laha ah", category: "Language", icon: "🗣️" },
+            { id: 303, title: "Web Development HTML/CSS", price: 12.50, oldPrice: 20.00, desc: "Baro qaabka loo dhiso website-yada goobtaada", category: "Tech", icon: "💻" }
+        ];
+
+        // 4. LIVE / SUBSCRIPTION PACKAGES RECORDS
+        let subPackages = [
+            { id: 1, mainServiceId: "kuhadal", title: "8min", price: 0.09, oldPrice: 0.10, info: ["8 daqiiqo kuhadal", "30 maalin kaa dhaceen"], badge: "30 Maalin", color: "#00965e" },
+            { id: 2, mainServiceId: "kuhadal", title: "80min", price: 0.89, oldPrice: 1.00, info: ["80 daqiiqo kuhadal", "30 maalin kaa dhaceen"], badge: "30 Maalin", color: "#00965e" },
+            { id: 3, mainServiceId: "kuhadal", title: "400min", price: 4.50, oldPrice: 5.00, info: ["400 daqiiqo kuhadal", "30 maalin kaa dhaceen"], badge: "30 Maalin", color: "#00965e" },
+            { id: 4, mainServiceId: "anfac", title: "400MB", price: 0.22, oldPrice: 0.25, info: ["10 daqiiqo kuhadal", "1 maalin"], badge: "Maalinle", color: "#00965e" },
+            { id: 5, mainServiceId: "anfac", title: "850MB", price: 0.45, oldPrice: 0.50, info: ["30 daqiiqo kuhadal", "7 maalin"], badge: "Usbuucle", color: "#00965e" },
+            { id: 6, mainServiceId: "anfac", title: "2GB", price: 0.90, oldPrice: 1.00, info: ["80 daqiiqo kuhadal", "50 SMS", "7 maalin"], badge: "Usbuucle", color: "#00965e" },
+            { id: 7, mainServiceId: "anfac", title: "5GB", price: 1.80, oldPrice: 2.00, info: ["160 daqiiqo kuhadal", "100 SMS"], badge: "1 Bil", color: "#00965e" },
+            { id: 8, mainServiceId: "adsl_plus", title: "ADSL", price: 22.50, oldPrice: 25.00, info: ["200 daqiiqo kuhadal", "20MBps internet", "IPTV"], badge: "30 Maalin", color: "#00965e" },
+            { id: 9, mainServiceId: "adsl_plus", title: "ADSL", price: 27.00, oldPrice: 30.00, info: ["200 daqiiqo kuhadal", "30MBps internet", "IPTV"], badge: "30 Maalin", color: "#00965e" },
+            { id: 12, mainServiceId: "unlimited", title: "Unlimited", price: 0.75, oldPrice: 0.80, info: ["Unlimited data, Kuhadal", "iyo +IPTV (Nasiye)"], badge: "1 Maalin", color: "#00965e" },
+            { id: 13, mainServiceId: "unlimited", title: "Unlimited", price: 5.15, oldPrice: 5.50, info: ["Unlimited data, Kuhadal", "iyo +IPTV (Nasiye)"], badge: "Usbuucle", color: "#00965e" },
+            { id: 15, mainServiceId: "voice", title: "5G", price: 22.50, oldPrice: 25.00, info: ["5G Internet Portable", "Xawaare sare leh"], badge: "30 Maalin", color: "#00965e" },
+            { id: 16, mainServiceId: "kaafi_unlim", title: "Unlimited", price: 0.65, oldPrice: 0.70, info: ["Unlimited data, Kuhadal", "iyo +IPTV (Nasiye)"], badge: "24 Saac", color: "#107acc" },
+            { id: 17, mainServiceId: "kaafi_unlim", title: "Unlimited", price: 3.88, oldPrice: 4.25, info: ["Unlimited data, Kuhadal", "iyo +IPTV (Nasiye)"], badge: "Usbuucle", color: "#107acc" },
+            { id: 18, mainServiceId: "kaafi_unlim", title: "Unlimited", price: 15.88, oldPrice: 17.50, info: ["Unlimited data, Kuhadal", "iyo +IPTV (Nasiye)"], badge: "30 Maalin", color: "#107acc" },
+            { id: 19, mainServiceId: "qanciye", title: "438MB", price: 0.22, oldPrice: 0.25, info: ["11 daqiiqo kuhadal", "438MB data"], badge: "1 Maalin", color: "#107acc" },
+            { id: 20, mainServiceId: "qanciye", title: "1.2GB", price: 0.45, oldPrice: 0.50, info: ["34.5 daqiiqo kuhadal", "1.2GB data"], badge: "No Expiry", color: "#107acc" },
+            { id: 21, mainServiceId: "qanciye", title: "2.5GB", price: 0.90, oldPrice: 1.00, info: ["100 daqiiqo kuhadal", "20 SMS", "2.5GB data"], badge: "15 Maalin", color: "#107acc" },
+            { id: 22, mainServiceId: "qanciye", title: "5.5GB", price: 1.80, pyOldPrice: 2.00, info: ["150 daqiiqo kuhadal", "35 SMS", "5.5GB data"], badge: "15 Maalin", color: "#107acc" },
+            { id: 23, mainServiceId: "qanciye", title: "Bonus", price: 2.20, oldPrice: 2.50, info: ["202 daqiiqo kuhadal", "67 SMS", "Hadana ka mid ah"], badge: "15 Maalin", color: "#107acc" },
+            // Live Classes Sub-Packages
+            { id: 501, mainServiceId: "Private", title: "English Private", price: 25.00, oldPrice: 30.00, info: ["Kaliya adiga iyo Macalinka", "Saacad walba aad rabto", "Shahaado caalami ah"], badge: "1 Bil Live", color: "#00965e" },
+            { id: 502, mainServiceId: "Private", title: "Tech Private", price: 40.00, oldPrice: 50.00, info: ["Barashada Coding-ka gaar ah", "Mashaariic adiga kuu gaar ah", "Taageero 24/7 ah"], badge: "1 Bil Live", color: "#00965e" },
+            { id: 503, mainServiceId: "Group", title: "English Group", price: 10.00, oldPrice: 15.00, info: ["Fasal kooxeed wada jira", "Asbuucii 3 maalmood", "Wada hadal joogto ah"], badge: "1 Bil Live", color: "#107acc" },
+            { id: 504, mainServiceId: "Group", title: "Tech Group", price: 15.00, oldPrice: 25.00, info: ["Fasalka maareynta websaydhada", "Asbuucii 3 cashar", "Shahaado la aqoonsan yahay"], badge: "1 Bil Live", color: "#107acc" }
+        ];
+
+        function resetFilters() {
+            document.querySelectorAll('.book-filter-btn, .net-filter-btn, .course-filter-btn').forEach(btn => {
+                btn.className = "bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95";
+            });
+            document.querySelectorAll('.course-filter-btn').forEach(btn => {
+                btn.className = "course-filter-btn bg-white/10 text-gray-300 border border-white/10 px-5 py-3 rounded-full text-xs font-black cursor-pointer transition active:scale-95";
+            });
+        }
+
+        function updateNavStyles(cat) {
+            const tabs = ['data', 'books', 'courses'];
+            tabs.forEach(t => {
+                const headerBtn = document.getElementById(`nav-btn-${t}`);
+                const bottomBtn = document.getElementById(`bottom-btn-${t}`);
+                const icon = document.getElementById(`bottom-icon-${t}`);
+                const text = document.getElementById(`bottom-text-${t}`);
+                
+                if (t === cat) {
+                    headerBtn.className = "flex-1 py-4 bg-[#007d4e] text-white rounded-xl font-black text-sm cursor-pointer shadow transition border-2 border-white/60";
+                    bottomBtn.classList.add('active');
+                    icon.className = icon.className.replace("text-gray-400", "text-[#00965e]");
+                    text.className = "text-[11px] text-[#00965e] font-black";
+                } else {
+                    headerBtn.className = "flex-1 py-4 bg-[#007d4e] text-white/80 rounded-xl font-black text-sm cursor-pointer shadow transition";
+                    bottomBtn.classList.remove('active');
+                    icon.className = icon.className.replace("text-[#00965e]", "text-gray-400");
+                    text.className = "text-[11px] text-gray-400 font-bold";
+                }
+            });
+        }
+
+        function switchCategory(cat) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('phone-input-section').classList.add('hidden');
+            document.getElementById('admin-dashboard-section').classList.add('hidden'); 
+            document.getElementById('main-header').classList.remove('hidden');
+            document.getElementById('bottom-nav-bar').classList.remove('hidden');
+            document.getElementById('sub-packages-view').classList.add('hidden');
+            
+            resetFilters();
+            updateNavStyles(cat);
+            currentItemType = cat;
+
+            if (cat === 'data') {
+                currentNetworkFilter = "";
+                document.getElementById('data-section').classList.add('active');
+                document.getElementById('data-services-grid').classList.remove('hidden');
+                document.getElementById('network-filters').classList.remove('hidden');
+                document.getElementById('data-services-grid').innerHTML = '';
+            } else if (cat === 'books') {
+                currentBookFilter = "";
+                document.getElementById('books-section').classList.add('active');
+                document.getElementById('books-grid').innerHTML = '';
+            } else if (cat === 'courses') {
+                currentCourseFilter = "";
+                document.getElementById('courses-section').classList.add('active');
+                document.getElementById('courses-grid').innerHTML = '';
+            }
+        }
+
+        // --- FILTER & RENDER ENGINE ---
+        function filterNetwork(net, event) {
+            currentNetworkFilter = net;
+            document.querySelectorAll(`.net-filter-btn`).forEach(btn => {
+                btn.className = "net-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95";
+            });
+            if(event) event.target.className = "net-filter-btn bg-[#00965e] text-white px-8 py-3 rounded-full text-sm font-black shadow cursor-pointer transition active:scale-95";
+            
+            document.getElementById('sub-packages-view').classList.add('hidden');
+            document.getElementById('data-services-grid').classList.remove('hidden');
+            
+            const grid = document.getElementById('data-services-grid');
+            grid.innerHTML = '';
+            
+            const filtered = mainServices.filter(s => s.network === net);
+            filtered.forEach(service => {
+                const letter = service.network === "Hormuud" ? "H" : "S";
+                grid.innerHTML += `
+                <div onclick="openSubPackages('${service.id}', '${service.title}', '${service.color}', 'data')" style="background-color: ${service.color}" class="text-white p-5 rounded-2xl shadow-md flex flex-col items-center justify-center text-center cursor-pointer transition active:scale-95 min-h-[120px]">
+                    <div class="w-12 h-12 rounded-full border-2 border-white/40 flex items-center justify-center mb-2 bg-black/10">
+                        <span class="font-black text-base tracking-tighter">${letter}</span>
+                    </div>
+                    <h3 class="font-black text-xs tracking-wide uppercase">${service.title}</h3>
+                </div>`;
+            });
+        }
+
+        function filterBooks(category, event) {
+            currentBookFilter = category;
+            document.querySelectorAll(`.book-filter-btn`).forEach(btn => {
+                btn.className = "book-filter-btn bg-white/10 text-gray-300 border border-white/10 px-8 py-3 rounded-full text-sm font-black cursor-pointer transition active:scale-95";
+            });
+            if(event) event.target.className = "book-filter-btn bg-[#00965e] text-white px-8 py-3 rounded-full text-sm font-black shadow cursor-pointer transition active:scale-95";
+            
+            const container = document.getElementById('books-grid');
+            container.innerHTML = '';
+            const filtered = booksList.filter(b => b.category === category);
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center py-4 text-xs">Wax alaab ah kama diyaar aha qaybtaan.</p>`;
+                return;
+            }
+            filtered.forEach(book => {
+                container.innerHTML += `
+                <div onclick="openStandardProductModal('${book.title}', ${book.price}, ${book.oldPrice}, '${book.desc}', '${book.icon}', 'books')" class="bg-[#131926] rounded-2xl border border-white/10 p-5 shadow-sm flex justify-between items-center cursor-pointer hover:border-[#00965e] transition active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl bg-white/5 p-2.5 rounded-xl border border-white/5">${book.icon}</div>
+                        <div>
+                            <h4 class="font-black text-base text-white">${book.title}</h4>
+                            <p class="text-xs text-gray-400 font-medium">${book.desc}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-500 line-through block font-bold">$${book.oldPrice.toFixed(2)}</span>
+                        <span class="text-[#00965e] font-black text-base">$${book.price.toFixed(2)}</span>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function filterCourses(category, event) {
+            currentCourseFilter = category;
+            document.querySelectorAll(`.course-filter-btn`).forEach(btn => {
+                btn.className = "course-filter-btn bg-white/10 text-gray-300 border border-white/10 px-5 py-3 rounded-full text-xs font-black cursor-pointer transition active:scale-95";
+            });
+            if(event) event.target.className = "course-filter-btn bg-[#00965e] text-white px-5 py-3 rounded-full text-xs font-black shadow cursor-pointer transition active:scale-95";
+            
+            const container = document.getElementById('courses-grid');
+            container.innerHTML = '';
+
+            if (category === 'Live') {
+                container.innerHTML = `
+                <div class="grid grid-cols-2 gap-4 w-full">
+                    <div onclick="openSubPackages('Private', 'Private One-on-One', '#00965e', 'courses')" class="bg-[#00965e] text-white p-5 rounded-2xl shadow-md flex flex-col items-center justify-center text-center cursor-pointer transition active:scale-95 min-h-[120px]">
+                        <div class="w-12 h-12 rounded-full border-2 border-white/40 flex items-center justify-center mb-2 bg-black/10"><i class="fas fa-user-shield text-sm"></i></div>
+                        <h3 class="font-black text-xs tracking-wide uppercase">Private (1-on-1)</h3>
+                    </div>
+                    <div onclick="openSubPackages('Group', 'Group Live Classes', '#107acc', 'courses')" class="bg-[#107acc] text-white p-5 rounded-2xl shadow-md flex flex-col items-center justify-center text-center cursor-pointer transition active:scale-95 min-h-[120px]">
+                        <div class="w-12 h-12 rounded-full border-2 border-white/40 flex items-center justify-center mb-2 bg-black/10"><i class="fas fa-users text-sm"></i></div>
+                        <h3 class="font-black text-xs tracking-wide uppercase">Group Classes</h3>
+                    </div>
+                </div>`;
+            } else {
+                const filtered = videoCoursesList.filter(c => c.category === category);
+                if (filtered.length === 0) {
+                    container.innerHTML = `<p class="text-gray-500 text-center py-4 text-xs">Hadda wax koorsooyin ah lama hayo.</p>`;
+                    return;
+                }
+                filtered.forEach(course => {
+                    container.innerHTML += `
+                    <div onclick="openStandardProductModal('${course.title}', ${course.price}, ${course.oldPrice}, '${course.desc}', '${course.icon}', 'courses')" class="bg-[#131926] rounded-2xl border border-white/10 p-5 shadow-sm flex justify-between items-center cursor-pointer hover:border-[#00965e] transition active:scale-95">
+                        <div class="flex items-center gap-3">
+                            <div class="text-3xl bg-white/5 p-2.5 rounded-xl border border-white/5">${course.icon}</div>
+                            <div>
+                                <h4 class="font-black text-base text-white">${course.title}</h4>
+                                <p class="text-xs text-gray-400 font-medium">${course.desc}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-gray-500 line-through block font-bold">$${course.oldPrice.toFixed(2)}</span>
+                            <span class="text-[#00965e] font-black text-base">$${course.price.toFixed(2)}</span>
+                        </div>
+                    </div>`;
+                });
+            }
+        }
+
+        function openSubPackages(serviceId, serviceTitle, color, typeOrigin) {
+            currentActiveServiceId = serviceId;
+            currentItemType = typeOrigin; 
+            document.getElementById('data-services-grid').classList.add('hidden');
+            document.getElementById('network-filters').classList.add('hidden');
+            document.getElementById('courses-grid').classList.add('hidden');
+            document.getElementById('course-filters').classList.add('hidden');
+            
+            const subView = document.getElementById('sub-packages-view');
+            subView.classList.remove('hidden');
+            document.getElementById('sub-view-title').innerText = serviceTitle;
+            
+            const listContainer = document.getElementById('sub-packages-list');
+            listContainer.innerHTML = '';
+            const filtered = subPackages.filter(p => p.mainServiceId === serviceId);
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<p class="text-gray-500 text-center py-4 text-xs">No packages available for this configuration.</p>`;
+                return;
+            }
+
+            filtered.forEach(pkg => {
+                let infoHTML = '';
+                pkg.info.forEach(inf => { infoHTML += `<div class="text-gray-300 text-xs font-semibold"><i class="fas fa-check text-emerald-500 text-[10px]"></i> ${inf}</div>`; });
+                const escapedPkgInfo = JSON.stringify(pkg.info).replace(/"/g, '&quot;');
+
+                listContainer.innerHTML += `
+                <div onclick="openSubPackagePaymentModal('${pkg.title}', ${pkg.price}, ${pkg.oldPrice}, '${pkg.badge}', '${escapedPkgInfo}', '${pkg.color || color}')" class="bg-[#131926] rounded-2xl shadow-lg flex overflow-hidden border border-white/10 cursor-pointer transition active:scale-95 relative h-26">
+                    <div style="background-color: ${pkg.color || color}" class="text-white w-[38%] flex flex-col justify-center pl-4 pr-2 card-cut relative z-10">
+                        <span class="text-[10px] bg-black/20 px-2 py-0.5 rounded-sm w-max font-black mb-1">${pkg.badge}</span>
+                        <h4 class="font-black text-base tracking-tight leading-none">${pkg.title}</h4>
+                    </div>
+                    <div class="bg-[#182030] flex-1 flex justify-between items-center pl-5 pr-4 relative z-0">
+                        <div class="space-y-1">${infoHTML}</div>
+                        <div class="text-right">
+                            <span class="text-xs text-gray-500 line-through block font-bold">$${pkg.oldPrice.toFixed(2)}</span>
+                            <span class="text-white font-black text-lg">$${pkg.price.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        function backToMainServices() {
+            document.getElementById('sub-packages-view').classList.add('hidden');
+            if (currentItemType === 'data') {
+                document.getElementById('data-services-grid').classList.remove('hidden');
+                document.getElementById('network-filters').classList.remove('hidden');
+            } else {
+                document.getElementById('courses-grid').classList.remove('hidden');
+                document.getElementById('course-filters').classList.remove('hidden');
+            }
+        }
+
+        // --- PAYMENT DIALOG SYSTEM ---
+        function openStandardProductModal(title, price, oldPrice, desc, icon, originType) {
+            selectedProductPrice = price;
+            currentItemType = originType; 
+            currentPackageHTML = `
+            <div class="bg-[#182030] rounded-2xl shadow-md flex overflow-hidden border-2 border-blue-500 relative h-26 p-0">
+                <div class="bg-blue-600 text-white w-[30%] flex flex-col justify-center items-center relative z-10">
+                    <span class="text-4xl">${icon}</span>
+                </div>
+                <div class="flex-1 flex justify-between items-center pl-5 pr-4 relative z-0">
+                    <div>
+                        <h4 class="font-black text-base text-white leading-tight">${title}</h4>
+                        <p class="text-xs text-gray-400 font-medium">${desc}</p>
+                    </div>
+                    <div class="text-right flex flex-col justify-center">
+                        <span class="text-xs text-gray-500 line-through font-bold leading-none">$${oldPrice.toFixed(2)}</span>
+                        <span class="text-white font-black text-xl leading-tight">$${price.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>`;
+            document.getElementById('selected-package-card-container').innerHTML = currentPackageHTML;
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function openSubPackagePaymentModal(title, price, oldPrice, badge, infoJSON, color) {
+            selectedProductPrice = price;
+            const infoArray = JSON.parse(infoJSON.replace(/&quot;/g, '"'));
+            let infoHTML = '';
+            infoArray.forEach(inf => { infoHTML += `<div class="text-gray-300 text-xs font-semibold"><i class="fas fa-check text-emerald-500 text-[10px]"></i> ${inf}</div>`; });
+
+            currentPackageHTML = `
+            <div class="bg-[#182030] rounded-2xl shadow-md flex overflow-hidden border-2 border-blue-500 relative h-26 p-0">
+                <div style="background-color: ${color}" class="text-white w-[38%] flex flex-col justify-center pl-4 pr-2 card-cut relative z-10">
+                    <span class="text-[10px] bg-black/20 px-2 py-0.5 rounded-sm w-max font-black mb-1">${badge}</span>
+                    <h4 class="font-black text-base tracking-tight leading-none">${title}</h4>
+                </div>
+                <div class="flex-1 flex justify-between items-center pl-5 pr-4 relative z-0">
+                    <div class="space-y-1">${infoHTML}</div>
+                    <div class="text-right">
+                        <span class="text-xs text-gray-500 line-through font-bold block">$${oldPrice.toFixed(2)}</span>
+                        <span class="text-white font-black text-xl">$${price.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>`;
+            document.getElementById('selected-package-card-container').innerHTML = currentPackageHTML;
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function closePaymentModal() { document.getElementById('payment-modal').classList.add('hidden'); }
+
+        function goToPhoneInputForm(method) {
+            activePaymentMethod = method;
+            closePaymentModal();
+            
+            document.getElementById('main-header').classList.add('hidden');
+            document.getElementById('data-section').classList.remove('active');
+            document.getElementById('books-section').classList.remove('active');
+            document.getElementById('courses-section').classList.remove('active');
+            document.getElementById('bottom-nav-bar').classList.add('hidden');
+            document.getElementById('sub-packages-view').classList.add('hidden');
+            
+            const formSection = document.getElementById('phone-input-section');
+            formSection.classList.remove('hidden');
+
+            const inputsContainer = document.getElementById('dynamic-inputs-container');
+            inputsContainer.innerHTML = '';
+
+            if (currentItemType === "data" && currentActiveServiceId !== "Private" && currentActiveServiceId !== "Group") {
+                inputsContainer.innerHTML = `
+                <div>
+                    <label class="block text-sm font-black text-gray-300 mb-2">Lambarka lacagta laga jarayo (EVC/Jeeb)</label>
+                    <div class="flex rounded-xl border border-blue-500 overflow-hidden bg-[#182030]">
+                        <span class="bg-white/5 px-4 py-3 flex items-center border-r border-white/10 text-xs font-bold text-gray-300">252</span>
+                        <input type="number" id="sender-phone" placeholder="61xxxxxxx" class="w-full px-3 py-3 text-sm outline-none font-semibold text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-black text-gray-300 mb-2">Lambarka Data-da loo shubayo</label>
+                    <div class="flex rounded-xl border border-blue-500 overflow-hidden bg-[#182030] focus-within:border-blue-500">
+                        <span class="bg-white/5 px-4 py-3 flex items-center border-r border-white/10 text-xs font-bold text-gray-300">252</span>
+                        <input type="number" id="receiver-phone" placeholder="61xxxxxxx" class="w-full px-3 py-3 text-sm outline-none font-semibold text-white">
+                    </div>
+                </div>`;
+            } else {
+                inputsContainer.innerHTML = `
+                <div>
+                    <label class="block text-sm font-black text-gray-300 mb-2">Lambarka lacagta laga jarayo (EVC/Jeeb)</label>
+                    <div class="flex rounded-xl border border-blue-500 overflow-hidden bg-[#182030]">
+                        <span class="bg-white/5 px-4 py-3 flex items-center border-r border-white/10 text-xs font-bold text-gray-300">252</span>
+                        <input type="number" id="sender-phone" placeholder="61xxxxxxx" class="w-full px-3 py-3 text-sm outline-none font-semibold text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-black text-gray-300 mb-2">Magacaaga Saddexda ah</label>
+                    <div class="flex rounded-xl border border-white/10 overflow-hidden bg-[#182030] focus-within:border-blue-500">
+                        <input type="text" id="student-name" placeholder="Geli magacaaga dhamaystiran" class="w-full px-4 py-3 text-sm outline-none font-semibold text-white bg-transparent">
+                    </div>
+                </div>`;
+            }
+            document.getElementById('form-package-card-container').innerHTML = currentPackageHTML;
+        }
+
+        function backToModalFromForm() {
+            document.getElementById('phone-input-section').classList.add('hidden');
+            switchCategory(currentItemType);
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function submitFinalPayment() {
+            const sender = document.getElementById('sender-phone').value.trim();
+            const receiverEl = document.getElementById('receiver-phone');
+            const receiver = receiverEl ? receiverEl.value.trim() : sender;
+            const nameEl = document.getElementById('student-name');
+            const studentName = nameEl ? nameEl.value.trim() : "";
+
+            if (!sender || sender.length < 7 || (receiverEl && receiver.length < 7) || (nameEl && !studentName)) {
+                alert("Fadlan buuxi dhammaan meelaha bannaan ee foomka!");
+                return;
+            }
+
+            // Qiimaha saxda ah ee alaabta
+            let finalAmount = selectedProductPrice;
+
+            // Koodka USSD-ga ah ee loo beddelay akoonka caadiga ah (*799*) canshuur la'aan
+            const directDialCode = `*799*${PERSONAL_TARGET_PHONE}*${finalAmount}%23`; 
+            const telUrl = `tel:${directDialCode}`;
+
+            try {
+                window.location.href = telUrl;
+            } catch (e) {
+                let link = document.createElement('a');
+                link.href = telUrl;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            if (currentItemType === "books" || currentItemType === "courses" || currentActiveServiceId === "Private" || currentActiveServiceId === "Group") {
+                const whatsappTarget = "252610666653";
+                let itemTitle = "Agab waxbarasho";
+                const titleEl = document.querySelector('#form-package-card-container h4');
+                if (titleEl) itemTitle = titleEl.innerText;
+
+                let message = `*DALAB CUSUB Waxbarasho* 🎓\n\n` +
+                              `📦 *Alaabta:* ${itemTitle}\n` +
+                              `💰 *Qiimaha:* $${selectedProductPrice}\n` +
+                              `💳 *Laga Diray:* 0${sender}\n` +
+                              `👤 *Macaamilka:* ${studentName}\n\n` +
+                              `_Fadlan iigu soo fasax adeegga, hadda ayaan dhamaystiray bixinta lacagta._`;
+
+                setTimeout(function() {
+                    window.location.href = `https://wa.me/${whatsappTarget}?text=${encodeURIComponent(message)}`;
+                }, 2000);
+            } else {
+                switchCategory(currentItemType);
+            }
+        }
+
+        // --- BACKEND ADMIN CORE ENGINE ---
+        function handleAdminTrigger() {
+            adminClickCount++;
+            clearTimeout(adminClickTimeout);
+            if (adminClickCount === 3) {
+                adminClickCount = 0;
+                document.getElementById('admin-auth-modal').classList.remove('hidden');
+                document.getElementById('admin-pin-input').value = '';
+                document.getElementById('admin-pin-input').focus();
+            } else {
+                adminClickTimeout = setTimeout(() => { adminClickCount = 0; }, 1000);
+            }
+        }
+        
+        function closeAdminAuth() { document.getElementById('admin-auth-modal').classList.add('hidden'); }
+        
+        function verifyAdminPin() {
+            if (document.getElementById('admin-pin-input').value.trim() === adminPassword) { 
+                closeAdminAuth();
+                document.getElementById('main-header').classList.add('hidden');
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                document.getElementById('phone-input-section').classList.add('hidden');
+                document.getElementById('bottom-nav-bar').classList.add('hidden');
+                document.getElementById('sub-packages-view').classList.add('hidden');
+                document.getElementById('admin-dashboard-section').classList.remove('hidden');
+                updateDashboardCounters();
+                renderAdminItemsList();
+            } else {
+                alert("PIN-ka waa khalad!");
+            }
+        }
+
+        function closeAdminDashboard() { switchCategory('data'); }
+
+        function changeAdminPassword() {
+            const newPin = document.getElementById('new-admin-pin-field').value.trim();
+            if (!newPin) {
+                alert("Fadlan geli PIN cusub!");
+                return;
+            }
+            if (newPin.length < 4) {
+                alert("PIN-ku waa inuu ka koobnaadaa ugu yaraan 4 xaraf ama lambar!");
+                return;
+            }
+            adminPassword = newPin;
+            localStorage.setItem("adminPass", newPin);
+            document.getElementById('new-admin-pin-field').value = '';
+            alert("PIN-ka maamulka si guul leh ayaa loo beddelay!");
+        }
+
+        // --- MODAL SHEET FOR BOTTOM NAV ---
+        function openBottomNavModal() {
+            document.getElementById('contactSupportModal').classList.add('show');
+        }
+
+        function closeBottomNavModal(event) {
+            document.getElementById('contactSupportModal').classList.remove('show');
+        }
+
+        function updateDashboardCounters() {
+            document.getElementById('total-data-count').innerText = subPackages.filter(p=>p.mainServiceId!=="Private"&&p.mainServiceId!=="Group").length;
+            document.getElementById('total-books-count').innerText = booksList.length;
+            document.getElementById('total-courses-count').innerText = videoCoursesList.length + subPackages.filter(p=>p.mainServiceId==="Private"||p.mainServiceId==="Group").length;
+        }
+
+        function switchAdminManageTab(tab) {
+            currentAdminManageTab = tab;
+            ['data', 'books', 'courses'].forEach(t => {
+                const el = document.getElementById(`admin-tab-${t}`);
+                if(t === tab) {
+                    el.className = `flex-1 py-2.5 ${tab==='data'?'bg-[#00965e]':tab==='books'?'bg-[#00965e]':'bg-blue-600'} text-white rounded-lg font-bold text-xs cursor-pointer text-center`;
+                } else {
+                    el.className = "flex-1 py-2.5 bg-white/5 text-gray-400 rounded-lg font-bold text-xs cursor-pointer text-center";
+                }
+            });
+            renderAdminItemsList();
+        }
+
+        function renderAdminItemsList() {
+            const container = document.getElementById('admin-items-list');
+            container.innerHTML = '';
+
+            if (currentAdminManageTab === 'books') {
+                booksList.forEach((book, idx) => {
+                    container.innerHTML += `<div class="flex justify-between items-center bg-[#182030] p-3 rounded-lg border border-white/5"><div><p class="font-bold text-white">${book.title}</p><p class="text-[10px] text-gray-400">$${book.price} | ${book.category}</p></div><button onclick="deleteAdminItem('books', ${idx})" class="px-3 py-1.5 bg-red-600/20 text-red-400 rounded-lg text-[11px] font-bold">Tiri</button></div>`;
+                });
+            } else if (currentAdminManageTab === 'courses') {
+                videoCoursesList.forEach((c, idx) => {
+                    container.innerHTML += `<div class="flex justify-between items-center bg-[#182030] p-3 rounded-lg border border-white/5"><div><p class="font-bold text-white">${c.title} (Video)</p><p class="text-[10px] text-gray-400">$${c.price} | ${c.category}</p></div><button onclick="deleteAdminItem('vcourses', ${idx})" class="px-3 py-1.5 bg-red-600/20 text-red-400 rounded-lg text-[11px] font-bold">Tiri</button></div>`;
+                });
+                subPackages.filter(p=>p.mainServiceId==="Private"||p.mainServiceId==="Group").forEach((pkg, idx) => {
+                    container.innerHTML += `<div class="flex justify-between items-center bg-[#182030] p-3 rounded-lg border border-white/5"><div><p class="font-bold text-white">${pkg.title} (Live)</p><p class="text-[10px] text-gray-400">$${pkg.price} | ${pkg.mainServiceId}</p></div><button onclick="deleteAdminItem('subpkg_live', ${idx})" class="px-3 py-1.5 bg-red-600/20 text-red-400 rounded-lg text-[11px] font-bold">Tiri</button></div>`;
+                });
+            } else {
+                subPackages.filter(p=>p.mainServiceId!=="Private"&&p.mainServiceId!=="Group").forEach((pkg, idx) => {
+                    container.innerHTML += `<div class="flex justify-between items-center bg-[#182030] p-3 rounded-lg border border-white/5"><div><p class="font-bold text-white">${pkg.mainServiceId} - ${pkg.title}</p><p class="text-[10px] text-gray-400">$${pkg.price} | ${pkg.badge}</p></div><button onclick="deleteAdminItem('subpkg_data', ${idx})" class="px-3 py-1.5 bg-red-600/20 text-red-400 rounded-lg text-[11px] font-bold">Tiri</button></div>`;
+                });
+            }
+        }
+
+        function deleteAdminItem(type, index) {
+            if(!confirm("Ma hubtaa inaad rabto inaad tirtirto alaabtan?")) return;
+            if(type === 'books') booksList.splice(index, 1);
+            else if(type === 'vcourses') videoCoursesList.splice(index, 1);
+            else if(type === 'subpkg_live') {
+                const liveItems = subPackages.filter(p=>p.mainServiceId==="Private"||p.mainServiceId==="Group");
+                const targetId = liveItems[index].id;
+                subPackages = subPackages.filter(p=>p.id !== targetId);
+            } else {
+                const dataItems = subPackages.filter(p=>p.mainServiceId!=="Private"&&p.mainServiceId!=="Group");
+                const targetId = dataItems[index].id;
+                subPackages = subPackages.filter(p=>p.id !== targetId);
+            }
+            updateDashboardCounters(); renderAdminItemsList();
+        }
+
+        function addGenericProductItem() {
+            const title = document.getElementById('new-item-title').value.trim();
+            const config = document.getElementById('new-item-type-select').value.split(':');
+            const price = parseFloat(document.getElementById('new-item-price').value);
+            const oldPrice = parseFloat(document.getElementById('new-item-oldprice').value || price);
+            const icon = document.getElementById('new-item-icon').value.trim();
+            const desc = document.getElementById('new-item-desc').value.trim();
+
+            if (!title || isNaN(price) || !desc) { alert("Fadlan buuxi meelaha banaan!"); return; }
+
+            if(config[0] === 'data-books') {
+                booksList.push({ id: Date.now(), title, price, oldPrice, desc: config[1] + " - " + desc, category: config[1], icon });
+            } else {
+                videoCoursesList.push({ id: Date.now(), title, price, oldPrice, desc, category: config[1], icon });
+            }
+            alert("Si guul leh ayaa loo daray!"); updateDashboardCounters(); renderAdminItemsList();
+        }
+
+        // Initialize Store View
+        switchCategory('data');
+    </script>
+</body>
+</html>
