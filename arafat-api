@@ -1,0 +1,17 @@
+from flask import Flask, jsonify
+
+app = Flask(__name__)
+
+
+@app.route('/api/items', methods=['GET'])
+def get_items():
+  # Halkaan waxaad ku dari kartaa xogta dukaankaaga ama badeecadahaaga
+  items = [
+      {"id": 1, "title": "Buugga Barashada Kombuyuutarka", "price": 15},
+      {"id": 2, "title": "Qalabka Elektaroonigga ah", "price": 45},
+  ]
+  return jsonify(items)
+
+
+if __name__ == '__main__':
+  app.run(debug=True)
