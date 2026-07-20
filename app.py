@@ -4,8 +4,11 @@ import os
 
 app = Flask(__name__)
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'shop.db')
+# Hubinta xiriirka Database-ka ee Render/Supabase
+database_url = os.environ.get('DATABASE_URL')
+print("Halkan waa URL-ka Database-ka:", database_url)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
