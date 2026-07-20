@@ -27,3 +27,19 @@ export default async function handler(req, res) {
     }
 }
 
+
+// Qaybta kaydinta badeecadaha ee localStorage
+function saveProduct(productName, productPrice) {
+    let products = JSON.parse(localStorage.getItem('arafat_products')) || [];
+    products.push({ name: productName, price: productPrice });
+    localStorage.setItem('arafat_products', JSON.stringify(products));
+    alert('Badeecaddu si guul leh ayay u kaydisay!');
+}
+
+function loadProducts() {
+    let products = JSON.parse(localStorage.getItem('arafat_products')) || [];
+    products.forEach(item => {
+        console.log(item.name + ' - ' + item.price);
+    });
+}
+
